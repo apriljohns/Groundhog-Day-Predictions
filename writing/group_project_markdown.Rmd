@@ -98,10 +98,10 @@ avg_daily_temp_unnested <- avg_daily_temp %>%
   unnest(avg_temp)
 
 # save in data folder so we don't need to run it fresh every time (it takes a while)
-# I'm commenting this out since it only needs to be run once, 
-# but wanted to show you where it came from 
+write_csv(avg_daily_temp_unnested, file = '../data/average_daily_temp.csv')
 
-# write_csv(avg_daily_temp_unnested, file = '../data/average_daily_temp.csv')
+# the code above only needs to be run once, but I'll leave it here for now so 
+# that you can see where it came from 
 
 # now we can just read it in like the others 
 avg_daily_temp_df <- read_csv('../data/average_daily_temp.csv')
@@ -116,7 +116,7 @@ For the preceding 6 weeks each year:
 - Groundhog Day is on February 2nd --> DOY = 33 (this col is in dataset, thankfully!)
 - 6 weeks = 42 days 
 - 42 - 33 = 9: we need the last 9 days of the preceding year 
-- Therefore, we want the compute average temperature in the range: DOY-1: 357-366 (to include leap years), DOY: 1-33
+- Therefore, we want to compute average temperature in the range: DOY-1: 357-366 (to include leap years), DOY: 1-33
 
 For the 6 week interval in question:
 - DOY between 34-75
