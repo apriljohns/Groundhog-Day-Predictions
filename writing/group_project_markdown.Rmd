@@ -153,8 +153,32 @@ prediction_eval_df <- predictions_raw %>%
 
 ```
 
+#jd: calculate deltas between: (avg_prediction_temp - avg_winter_temp) and (avg_spring_temp - #avg_prediction_temp) as absolute values.
 
+```{r}
+#winter delta
+prediction_eval_df <- prediction_eval_df %>% 
+  mutate(delta_winter = abs(avg_winter_temp - avg_prediction_temp))
 
+#spring delta
+prediction_eval_df <- prediction_eval_df %>% 
+  mutate(delta_spring = abs(avg_spring_temp - avg_prediction_temp))
 
+```
 
+#jd: If delta_winter < delta_spring, then there was 6 more weeks of winter according to our model. Make another
+new column relecting TRUE/FALSE for the above relationship.
+Then, add another column to reflect correct or incorrect status of prognostication based on an 'and' relationship between 
+the 'shadow' column and the 'six_more_weeks' column.
+```{r}
+#make the column for six more weeks based on our model
+prediction_eval_df <- prediction_eval_df %>% 
+  mutate(six_more_weeks = delta_winter < delta_spring)
+
+#make the column for correct vs incorrect prognostication
+prediction_eval_df %>%
+  mutate(prediction_correctness = if_else(shadow & six_more_weeks, "correct", "incorrect"))
+```
+
+## Last commit didn't take for some reason - adding a line here
 
