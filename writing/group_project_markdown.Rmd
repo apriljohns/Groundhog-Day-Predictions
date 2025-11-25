@@ -180,5 +180,4 @@ prediction_eval_df <- prediction_eval_df %>%
   mutate(is_correct = if_else(shadow & six_more_weeks, TRUE, FALSE))
 ```
 
-## Last commit didn't take for some reason - adding a line here
 
