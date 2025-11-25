@@ -176,7 +176,7 @@ prediction_eval_df <- prediction_eval_df %>%
   mutate(six_more_weeks = delta_winter < delta_spring)
 
 #make the column for correct vs incorrect prognostication
-prediction_eval_df %>%
+prediction_eval_df <-  prediction_eval_df %>%
   mutate(prediction_correctness = if_else(shadow & six_more_weeks, "correct", "incorrect"))
 ```
 
