@@ -173,7 +173,7 @@ rolling_avg <- prediction_eval_df %>%
 ```
 #join with groundhog names for IDs, because that will be nice for the graphic
 ```{r}
-rolling_avg_hognames <- foo %>% 
+rolling_avg_hognames <- rolling_avg %>% 
   left_join(groundhogs_raw %>%
               select(id, slug), by = "id")
 
@@ -185,9 +185,8 @@ library(dygraphs)
 #I will need to tidy the data so each groundhog has a column with its rolling
 #averages, looking at the example at 
 #https://rstudio.github.io/dygraphs/gallery-series-highlighting.html
-#the data will need to be in the same format as UKLungDeaths, so each groundhog
-#will need to have its "is_correct" column vectorized. To do that, first
-#pivot wider.
+#the data will need to be in the same format as UKLungDeaths, which is a time
+#series (ts). FIGURE THIS OUT ON MONDAY 12/1!
 
 wide_rollingavgs <- rolling_avg_hognames %>% 
   pivot_wider(names_from = slug, values_from = rolling_mean)
@@ -195,6 +194,7 @@ wide_rollingavgs <- rolling_avg_hognames %>%
 #select only needed columns:
 wide_rolling_avgs_year_only <- wide_rollingavgs %>% 
   select(2, 12:86)
+
 
 ```
 
