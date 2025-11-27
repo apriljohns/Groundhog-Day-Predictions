@@ -195,7 +195,13 @@ wide_rollingavgs <- rolling_avg_hognames %>%
 wide_rolling_avgs_year_only <- wide_rollingavgs %>% 
   select(2, 12:86)
 
-
+#create timeseries
+ts_foo <- ts(wide_rolling_avgs_year_only[, !names(wide_rolling_avgs_year_only) %in% "year"],
+              start = min(wide_rolling_avgs_year_only$year),
+              frequency = 1)
+#this resulted in a ts that goes up to the year 3250. Need to fix this.
+#perhaps this is because there are 1270 rows. Try to collapse data so there
+# is one year per row!
 ```
 
 
