@@ -195,13 +195,19 @@ wide_rollingavgs <- rolling_avg_hognames %>%
 wide_rolling_avgs_year_only <- wide_rollingavgs %>% 
   select(2, 12:86)
 
-#create timeseries
-ts_foo <- ts(wide_rolling_avgs_year_only[, !names(wide_rolling_avgs_year_only) %in% "year"],
-              start = min(wide_rolling_avgs_year_only$year),
-              frequency = 1)
-#this resulted in a ts that goes up to the year 3250. Need to fix this.
-#perhaps this is because there are 1270 rows. Try to collapse data so there
-# is one year per row!
+#create timeseries. The above has 1270 rows. There should be 43 for 43 years. The consolidate call
+#will squash everything into one row per year. There are NaNs (not a number) instead of NAs now,
+#which are an artifact of the calculation of mean. We can replace them with NA later if the html
+#widget will not allow. The widget does allow for NA.
+
+foo_consolidated <- wide_rolling_avgs_year_only %>%
+  group_by(year) %>%
+  summarise(across(everything(), mean, na.rm = TRUE))
+
+#This looks right. Can we make a timeseries now?
+
+
+
 ```
 
 
