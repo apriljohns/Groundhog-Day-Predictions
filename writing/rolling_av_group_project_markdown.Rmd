@@ -206,7 +206,17 @@ foo_consolidated <- wide_rolling_avgs_year_only %>%
 
 #This looks right. Can we make a timeseries now?
 
+library(xts)
+library(zoo)
 
+#year column must be in a date format
+foo_consolidated$year <- ymd(paste0(foo_consolidated$year, "-02-02"))
+
+#convert to xts class, which is friendly to dygraphs
+foo_consolidated_ts <- as.xts(foo_consolidated)
+
+#try DYGRAPHS to see if it works!
+dygraph(foo_consolidated_ts, main = "5 yr Rolling Avgs")
 
 ```
 
