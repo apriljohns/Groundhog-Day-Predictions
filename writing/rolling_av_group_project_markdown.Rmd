@@ -217,6 +217,68 @@ foo_consolidated_ts <- as.xts(foo_consolidated)
 
 #try DYGRAPHS to see if it works!
 dygraph(foo_consolidated_ts, main = "5 yr Rolling Avgs")
+#it works, but too busy.
+```
+
+# try Plotlywith a pulldown
+# below works, but only able to plot one prognosticator at a time
+
+```{r}
+library(plotly)
+library(dplyr)
+
+#having hyphens in the name column is a problem
+names(foo_consolidated) <- gsub("-", "_", names(foo_consolidated))
+
+#get rid of data column and generate vectors with just names and dates
+foo_consolidated_names <- names(foo_consolidated)[-1]
+foo_consolidated_dates <- names(foo_consolidated)[1]
+
+#base plot
+p_fc <- plot_ly(foo_consolidated,
+                x = as.formula(paste0("~", foo_consolidated_dates)))
+
+#add in the data columns
+for(col in  foo_consolidated_names) {
+  p_fc <- p_fc %>% 
+    add_lines(y = as.formula(paste0("~",
+                                    col)), name = col, visible = TRUE)
+}
+
+button_list <- list(
+  list(method = "restyle",
+       args = list("visible", as.list(rep(TRUE,
+                                          length(foo_consolidated_names)))),
+       label = "ALl Series")
+)
+
+for(i in seq_along(foo_consolidated_names)) {
+  visible_vector <- rep(FALSE, length(foo_consolidated_names))
+  visible_vector[i] <- TRUE
+  
+  button_list[[i + 1]] <- list(
+    method = "restyle",
+    args = list("visible", as.list(visible_vector)),
+    label = foo_consolidated_names[i]
+  )
+}
+
+# Apply layout
+p_fc <- p_fc %>%
+  layout(
+    title = "5 year rolling average for proportion correct",
+    xaxis = list(title = "Date"),
+    yaxis = list(title = "Value"),
+    updatemenus = list(
+      list(
+        y = 1.15,
+        yanchor = "top",
+        buttons = button_list
+      )
+    )
+  )
+
+p_fc
 
 ```
 
