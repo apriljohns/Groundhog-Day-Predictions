@@ -52,53 +52,27 @@ exploring the package:
 ```{r}
 library("nasapower")
 
-# example from the documentation linked above 
-daily_single_ag <- get_power(
-  community = "ag",
-  lonlat = c(151.81, -27.48),
-  pars = c("RH2M", "T2M", "PRECTOTCORR"),
-  dates = c("1985-01-01", "1985-01-31"),
-  temporal_api = "daily")
 
-daily_single_ag
-
-# possible parameters for daily data 
-params <- query_parameters(community = 'ag', temporal_api = 'daily') 
-
-# parameter names 
-params %>% 
-  names()
-
-# open params list in another window to see overview 
-params %>% 
-  view()
-
-# looking specifically at T2M --> this returns a list object with description 
-# I think this is what we want! 
-# daily average temp (C) at 2 meters above the surface 
-t2m <- query_parameters(pars = 'T2M', community = 'ag', temporal_api = 'daily')
-
-t2m
 ```
 
 using the nasapower package for our data 
 ```{r}
 # map avg temp data to each latitude/longitude pair 
-avg_daily_temp <- groundhogs_raw %>% 
-  mutate(avg_temp = map2(.x = longitude, .y = latitude, 
-                         ~get_power(community = "ag",
-                                    lonlat = c(.x, .y),
-                                    pars = c("T2M"),
-                                    dates = c("1981-01-01", "2024-01-31"),
-                                    temporal_api = "daily")))
+##avg_daily_temp <- groundhogs_raw %>% 
+ ## mutate(avg_temp = map2(.x = longitude, .y = latitude, 
+                        ## ~get_power(community = "ag",
+                           ##         lonlat = c(.x, .y),
+                            ##        pars = c("T2M"),
+                             ##       dates = c("1981-01-01", "2024-01-31"),
+                              ##      temporal_api = "daily")))
 
 # unnest data 
-avg_daily_temp_unnested <- avg_daily_temp %>% 
-  select(id, slug, avg_temp) %>% 
-  unnest(avg_temp)
+##avg_daily_temp_unnested <- avg_daily_temp %>% 
+ ## select(id, slug, avg_temp) %>% 
+ ## unnest(avg_temp)
 
 # save in data folder so we don't need to run it fresh every time (it takes a while)
-write_csv(avg_daily_temp_unnested, file = '../data/average_daily_temp.csv')
+##write_csv(avg_daily_temp_unnested, file = '../data/average_daily_temp.csv')
 
 # the code above only needs to be run once, but I'll leave it here for now so 
 # that you can see where it came from 
@@ -179,5 +153,136 @@ prediction_eval_df <- prediction_eval_df %>%
 prediction_eval_df <- prediction_eval_df %>%
   mutate(is_correct = if_else(shadow & six_more_weeks, TRUE, FALSE))
 ```
+
+#calculate the rolling average for accuracy
+```{r}
+#group by groundhog
+rolling_avg <- prediction_eval_df %>% 
+  group_by(id) %>% 
+  arrange(year) %>% 
+  mutate(rolling_mean = (is_correct +
+              lag(is_correct, 1) +
+              lag(is_correct, 2) +
+              lag(is_correct, 3) +
+              lag(is_correct, 4)) / 5) %>% 
+  ungroup()
+
+
+
+
+```
+#join with groundhog names for IDs, because that will be nice for the graphic
+```{r}
+rolling_avg_hognames <- rolling_avg %>% 
+  left_join(groundhogs_raw %>%
+              select(id, slug), by = "id")
+
+
+```
+#make the widget
+```{r}
+library(dygraphs)
+#I will need to tidy the data so each groundhog has a column with its rolling
+#averages, looking at the example at 
+#https://rstudio.github.io/dygraphs/gallery-series-highlighting.html
+#the data will need to be in the same format as UKLungDeaths, which is a time
+#series (ts). FIGURE THIS OUT ON MONDAY 12/1!
+
+wide_rollingavgs <- rolling_avg_hognames %>% 
+  pivot_wider(names_from = slug, values_from = rolling_mean)
+
+#select only needed columns:
+wide_rolling_avgs_year_only <- wide_rollingavgs %>% 
+  select(2, 12:86)
+
+#create timeseries. The above has 1270 rows. There should be 43 for 43 years. The consolidate call
+#will squash everything into one row per year. There are NaNs (not a number) instead of NAs now,
+#which are an artifact of the calculation of mean. We can replace them with NA later if the html
+#widget will not allow. The widget does allow for NA.
+
+foo_consolidated <- wide_rolling_avgs_year_only %>%
+  group_by(year) %>%
+  summarise(across(everything(), mean, na.rm = TRUE))
+
+#This looks right. Can we make a timeseries now?
+
+library(xts)
+library(zoo)
+
+#year column must be in a date format
+foo_consolidated$year <- ymd(paste0(foo_consolidated$year, "-02-02"))
+
+#convert to xts class, which is friendly to dygraphs
+foo_consolidated_ts <- as.xts(foo_consolidated)
+
+#try DYGRAPHS to see if it works!
+dygraph(foo_consolidated_ts, main = "5 yr Rolling Avgs")
+#it works, but too busy.
+```
+
+# try Plotlywith a pulldown
+# below works, but only able to plot one prognosticator at a time
+
+```{r}
+library(plotly)
+library(dplyr)
+
+#having hyphens in the name column is a problem
+names(foo_consolidated) <- gsub("-", "_", names(foo_consolidated))
+
+#get rid of data column and generate vectors with just names and dates
+foo_consolidated_names <- names(foo_consolidated)[-1]
+foo_consolidated_dates <- names(foo_consolidated)[1]
+
+#base plot
+p_fc <- plot_ly(foo_consolidated,
+                x = as.formula(paste0("~", foo_consolidated_dates)))
+
+#add in the data columns
+for(col in  foo_consolidated_names) {
+  p_fc <- p_fc %>% 
+    add_lines(y = as.formula(paste0("~",
+                                    col)), name = col, visible = TRUE)
+}
+
+button_list <- list(
+  list(method = "restyle",
+       args = list("visible", as.list(rep(TRUE,
+                                          length(foo_consolidated_names)))),
+       label = "ALl Series")
+)
+
+for(i in seq_along(foo_consolidated_names)) {
+  visible_vector <- rep(FALSE, length(foo_consolidated_names))
+  visible_vector[i] <- TRUE
+  
+  button_list[[i + 1]] <- list(
+    method = "restyle",
+    args = list("visible", as.list(visible_vector)),
+    label = foo_consolidated_names[i]
+  )
+}
+
+# Apply layout
+p_fc <- p_fc %>%
+  layout(
+    title = "5 year rolling average for proportion correct",
+    xaxis = list(title = "Date"),
+    yaxis = list(title = "Value"),
+    updatemenus = list(
+      list(
+        y = 1.15,
+        yanchor = "top",
+        buttons = button_list
+      )
+    )
+  )
+
+p_fc
+
+```
+
+
+
 
 
