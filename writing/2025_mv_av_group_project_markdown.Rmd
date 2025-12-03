@@ -203,16 +203,15 @@ rolling_avg_hognames <- rolling_avg %>%
   left_join(groundhogs_raw %>%
               select(id, slug, region), by = "id")
 
-
+#reorder columns
+rolling_avg_hognames <- rolling_avg_hognames %>% 
+  relocate(slug, .after = id) %>% 
+  relocate(region, .after = slug)
 ```
 #make the widget
+Back to the drawing board after some less than ideal plots in the pre-2025
+version of the script.
 ```{r}
-library(dygraphs)
-#I will need to tidy the data so each groundhog has a column with its rolling
-#averages, looking at the example at 
-#https://rstudio.github.io/dygraphs/gallery-series-highlighting.html
-#the data will need to be in the same format as UKLungDeaths, which is a time
-#series (ts). FIGURE THIS OUT ON MONDAY 12/1!
 
 
 
