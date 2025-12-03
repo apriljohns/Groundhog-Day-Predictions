@@ -1,0 +1,224 @@
+---
+title: "Group Project"
+author: "April Johns, Mollie Murphy, Josh Daniels"
+date: "2025-11-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+pull in raw data 
+```{r}
+library(tidyverse)
+
+groundhogs_raw <- read_csv('../data/groundhogs_2025.csv')
+predictions_raw <- read_csv('../data/predictions_2025.csv')
+```
+
+exploring the data
+```{r}
+# we have predictions from 1886 - 2023 
+predictions_raw %>% 
+  pull(year) %>% 
+  range()
+
+# number of predictions (aka prognosticating groundhogs) over the years 
+predictions_raw %>% 
+  group_by(year) %>% 
+  count() %>% 
+  ggplot() +
+  geom_line(aes(x = year, y = n))
+```
+
+uptick in predictions around this time: 
+year  n 
+
+1979	5			
+1980	7			
+1981	7			
+1982	9			
+1983	10	
+
+Coincidently, daily weather data seems to only date back to 1981, so maybe we subset our data to 1981-present? 
+
+
+Here's a package/weather API that I found works well integrating with R: 
+
+https://cran.r-project.org/web/packages/nasapower/vignettes/nasapower.html
+
+exploring the package: 
+```{r}
+library("nasapower")
+
+# # example from the documentation linked above 
+# daily_single_ag <- get_power(
+#   community = "ag",
+#   lonlat = c(151.81, -27.48),
+#   pars = c("RH2M", "T2M", "PRECTOTCORR"),
+#   dates = c("1985-01-01", "1985-01-31"),
+#   temporal_api = "daily")
+# 
+# daily_single_ag
+# 
+# # possible parameters for daily data 
+# params <- query_parameters(community = 'ag', temporal_api = 'daily') 
+# 
+# # parameter names 
+# params %>% 
+#   names()
+# 
+# # open params list in another window to see overview 
+# params %>% 
+#   view()
+# 
+# # looking specifically at T2M --> this returns a list object with description 
+# # I think this is what we want! 
+# # daily average temp (C) at 2 meters above the surface 
+# t2m <- query_parameters(pars = 'T2M', community = 'ag', temporal_api = 'daily')
+# 
+# t2m
+```
+
+using the nasapower package for our data 
+```{r}
+# map avg temp data to each latitude/longitude pair 
+# avg_daily_temp <- groundhogs_raw %>% 
+#   mutate(avg_temp = map2(.x = longitude, .y = latitude, 
+#                          ~get_power(community = "ag",
+#                                     lonlat = c(.x, .y),
+#                                     pars = c("T2M"),
+#                                     dates = c("1981-01-01", "2025-07-01"),
+#                                     temporal_api = "daily")))
+# 
+# # unnest data 
+# avg_daily_temp_unnested <- avg_daily_temp %>% 
+#   select(id, slug, avg_temp) %>% 
+#   unnest(avg_temp)
+# 
+# # save in data folder so we don't need to run it fresh every time (it takes a while)
+# write_csv(avg_daily_temp_unnested, file = '../data/average_daily_temp_2025.csv')
+
+# the code above only needs to be run once, but I'll leave it here for now so 
+# that you can see where it came from 
+
+# now we can just read it in like the others 
+avg_daily_temp_df <- read_csv('../data/average_daily_temp_2025.csv')
+
+```
+
+
+
+Calculating the average temperature for each 6-week interval: 
+
+For the preceding 6 weeks each year: 
+- Groundhog Day is on February 2nd --> DOY = 33 (this col is in dataset, thankfully!)
+- 6 weeks = 42 days 
+- 42 - 33 = 9: we need the last 9 days of the preceding year 
+- Therefore, we want to compute average temperature in the range: DOY-1: 357-366 (to include leap years), DOY: 1-33
+
+For the 6 week interval in question:
+- DOY between 34-75
+
+For the following 6 weeks of spring: 
+- DOY between 76-116 
+
+```{r}
+# data frame with average winter temp (6 weeks preceding groundhog day)
+avg_winter_temp_df <- avg_daily_temp_df %>% 
+  filter(DOY %in% c(1:33, 357:366)) %>% 
+  mutate(groundhog_winter_year = if_else(DOY %in% c(357:366), YEAR + 1, YEAR)) %>% 
+  group_by(id, groundhog_winter_year) %>% 
+  summarise(avg_winter_temp = mean(T2M))
+
+# data frame with average temp for prediction interval (6 weeks following groundhog day)
+avg_prediction_temp_df <- avg_daily_temp_df %>% 
+  filter(DOY %in% c(34:75)) %>% 
+  group_by(id, YEAR) %>% 
+  summarise(avg_prediction_temp = mean(T2M))
+
+# data frame with average spring temp (6 weeks following prediction interval -- 6-12 weeks following groundhog day)
+avg_spring_temp_df <- avg_daily_temp_df %>% 
+  filter(DOY %in% c(75:116)) %>% 
+  group_by(id, YEAR) %>% 
+  summarise(avg_spring_temp = mean(T2M))
+  
+# join dataframes together, then compare which season prediction interval is closest to 
+prediction_eval_df <- predictions_raw %>% 
+  filter(year > 1980) %>% 
+  left_join(avg_winter_temp_df, by = c('id', 'year' = 'groundhog_winter_year')) %>% 
+  left_join(avg_prediction_temp_df, by = c('id', 'year' = 'YEAR')) %>% 
+  left_join(avg_spring_temp_df, by = c('id', 'year' = 'YEAR')) 
+
+```
+
+#jd: calculate deltas between: (avg_prediction_temp - avg_winter_temp) and (avg_spring_temp - #avg_prediction_temp) as absolute values.
+
+```{r}
+#winter delta
+prediction_eval_df <- prediction_eval_df %>% 
+  mutate(delta_winter = abs(avg_winter_temp - avg_prediction_temp))
+
+#spring delta
+prediction_eval_df <- prediction_eval_df %>% 
+  mutate(delta_spring = abs(avg_spring_temp - avg_prediction_temp))
+
+```
+
+#jd: If delta_winter < delta_spring, then there was 6 more weeks of winter according to our model. Make another
+new column relecting TRUE/FALSE for the above relationship.
+Then, add another column to reflect correct or incorrect status of prognostication based on an 'and' relationship between 
+the 'shadow' column and the 'six_more_weeks' column.
+```{r}
+#make the column for six more weeks based on our model
+prediction_eval_df <- prediction_eval_df %>% 
+  mutate(six_more_weeks = delta_winter < delta_spring)
+
+#make the column for correct vs incorrect prognostication
+prediction_eval_df <- prediction_eval_df %>%
+  mutate(is_correct = if_else(shadow & six_more_weeks, TRUE, FALSE))
+```
+
+#calculate the rolling average for accuracy
+```{r}
+#group by groundhog
+rolling_avg <- prediction_eval_df %>% 
+  group_by(id) %>% 
+  arrange(year) %>% 
+  mutate(rolling_mean = (is_correct +
+              lag(is_correct, 1) +
+              lag(is_correct, 2) +
+              lag(is_correct, 3) +
+              lag(is_correct, 4)) / 5) %>% 
+  ungroup()
+
+
+
+
+```
+#join with groundhog names for IDs, because that will be nice for the graphic
+```{r}
+rolling_avg_hognames <- rolling_avg %>% 
+  left_join(groundhogs_raw %>%
+              select(id, slug, region), by = "id")
+
+
+```
+#make the widget
+```{r}
+library(dygraphs)
+#I will need to tidy the data so each groundhog has a column with its rolling
+#averages, looking at the example at 
+#https://rstudio.github.io/dygraphs/gallery-series-highlighting.html
+#the data will need to be in the same format as UKLungDeaths, which is a time
+#series (ts). FIGURE THIS OUT ON MONDAY 12/1!
+
+
+
+
+
+
+
+
+
