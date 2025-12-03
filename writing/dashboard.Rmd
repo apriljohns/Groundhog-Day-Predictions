@@ -7,7 +7,21 @@ output:
 ---
 
 ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+```
+
+```{r}
 library(flexdashboard)
+library(tidyverse)
+library(reactable)
+library(reactablefmtr)
+library(htmltools)
+library(scales)
+
+# pull in raw data 
+groundhogs_raw <- read_csv('../data/groundhogs_2025.csv')
+predictions_raw <- read_csv('../data/predictions_2025.csv')
+avg_daily_temp_df <- read_csv('../data/average_daily_temp_2025.csv')
 ```
 
 Sidebar {.sidebar}
@@ -32,6 +46,98 @@ Column {data-width=600}
 -------------------------------------
     
 ### Leader Board
+
+```{r}
+# data frame with average winter temp (6 weeks preceding groundhog day)
+avg_winter_temp_df <- avg_daily_temp_df %>% 
+  filter(DOY %in% c(1:33, 357:366)) %>% 
+  mutate(groundhog_winter_year = if_else(DOY %in% c(357:366), YEAR + 1, YEAR)) %>% 
+  group_by(id, groundhog_winter_year) %>% 
+  summarise(avg_winter_temp = mean(T2M))
+
+# data frame with average temp for prediction interval (6 weeks following groundhog day)
+avg_prediction_temp_df <- avg_daily_temp_df %>% 
+  filter(DOY %in% c(34:75)) %>% 
+  group_by(id, YEAR) %>% 
+  summarise(avg_prediction_temp = mean(T2M))
+
+# data frame with average spring temp (6 weeks following prediction interval -- 6-12 weeks following groundhog day)
+avg_spring_temp_df <- avg_daily_temp_df %>% 
+  filter(DOY %in% c(75:116)) %>% 
+  group_by(id, YEAR) %>% 
+  summarise(avg_spring_temp = mean(T2M))
+  
+# join dataframes together, then compare which season prediction interval is closest to 
+prediction_eval_df <- predictions_raw %>% 
+  filter(year > 1980) %>% 
+  filter(!is.na(shadow)) %>% 
+  left_join(avg_winter_temp_df, by = c('id', 'year' = 'groundhog_winter_year')) %>% 
+  left_join(avg_prediction_temp_df, by = c('id', 'year' = 'YEAR')) %>% 
+  left_join(avg_spring_temp_df, by = c('id', 'year' = 'YEAR')) %>% 
+  mutate(delta_winter = abs(avg_winter_temp - avg_prediction_temp)) %>% 
+  mutate(delta_spring = abs(avg_spring_temp - avg_prediction_temp)) %>% 
+  mutate(six_more_weeks = delta_winter < delta_spring) %>% 
+  mutate(is_correct = if_else(shadow & six_more_weeks, TRUE, FALSE))
+
+# make a separate leaderboard dataframe, compute accuracy 
+leaderboard_df <- prediction_eval_df %>% 
+  group_by(id) %>% 
+  summarize(num_predictions = n(), 
+            total_correct = sum(is_correct),
+            accuracy = sum(is_correct)/n(),
+            start_year = min(year)) %>% 
+  arrange(desc(accuracy)) %>% 
+  mutate(rank = row_number()) %>% 
+  left_join(groundhogs_raw, by = 'id') 
+  
+# use reactable to make interactive leaderboard 
+leaderboard_df %>% 
+  select(rank, name, accuracy, type, city, region, country) %>%
+  reactable(theme = fivethirtyeight(),
+            defaultColDef = colDef(align = "center",
+                                   headerStyle = list(background = "lightblue")),
+            columns = list(name = colDef(name = 'Name',
+                                         cell = function(value, index) {
+                                           url <- leaderboard_df$source[index]
+                                           tags$a(href = url, value)
+                                         }),
+                           accuracy = colDef(name = "Accuracy",
+                                                 cell = data_bars(., text_position = 'above',
+                                                                  number_fmt = percent_format(accuracy = 0.1),
+                                                                  fill_color = 'steelblue', background = 'lightgrey')),
+                           region = colDef(name = "State/Province"),
+                           url = colDef(show = FALSE)),
+            onClick = 'expand',
+            details = function(index){
+              sub_table <- leaderboard_df %>% 
+                slice(index) %>% 
+                select(image, description, num_predictions, start_year, source)
+              reactable(sub_table,
+                        defaultColDef = colDef(headerVAlign = 'bottom'),
+                        columns = list(image = colDef(name = 'Photo',
+                                                      cell = function(value) {
+                                                        tags$img(src = value,
+                                                                 width = 400)
+                                                        },
+                                                      width = 420),
+                                       description = colDef(name = "Description",
+                                                            width = 400),
+                                       source = colDef(name = 'Source',
+                                                       cell = function(value, index) {
+                                                         url <- leaderboard_df$source[index]
+                                                         tags$a(href = url, value)
+                                                         }),
+                                       num_predictions = colDef(name = "Total Number of Predictions"),
+                                       start_year = colDef(name = "First Year Prognosticating")))
+            },
+            height = 800,
+            #width = 1400,
+            highlight = TRUE,
+            defaultPageSize = 15,
+            filterable = TRUE,
+            searchable = TRUE)
+```
+
 
 Rolling Average
 ============================================================================
