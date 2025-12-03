@@ -18,15 +18,12 @@ I was thinking it would be cute to have a little explanation/history of groundho
 Map
 ======================================================================
 
-Row
+Column {data-width=600}
 -----------------------------------------------------------------------
 
 ### Map of US and Canada
 
-Row
------------------------------------------------------------------------
-
-### New England Zoom In
+### New England Zoom
 
 Leader Board
 ============================================================================
