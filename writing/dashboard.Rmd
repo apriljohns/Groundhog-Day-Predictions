@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Groundhog Flex Dashboard"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
@@ -10,27 +10,47 @@ output:
 library(flexdashboard)
 ```
 
-Column {data-width=650}
+Sidebar {.sidebar}
+======================================================================
+
+I was thinking it would be cute to have a little explanation/history of groundhog day as well as some navigation info
+
+Map
+======================================================================
+
+Row
 -----------------------------------------------------------------------
 
-### Chart A
+### Map of US and Canada
 
-```{r}
-
-```
-
-Column {data-width=350}
+Row
 -----------------------------------------------------------------------
 
-### Chart B
+### New England Zoom In
 
-```{r}
+Leader Board
+============================================================================
 
-```
+Column {data-width=600}
+-------------------------------------
+    
+### Leader Board
 
-### Chart C
+Rolling Average
+============================================================================
 
-```{r}
+Column {data-width=600}
+-------------------------------------
+    
+### Rolling Average
 
-```
+Documentation
+============================================================================
 
+Things to document:
+
+Data sources (weather, groundhogs, packages?)
+
+Spring onset calcs
+
+Phylo info
