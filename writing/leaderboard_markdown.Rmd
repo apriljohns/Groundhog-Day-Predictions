@@ -1,6 +1,7 @@
 ---
 title: "Groundhog Leaderboard"
-output: html_document
+#output: html_document
+output: flexdashboard::flex_dashboard
 runtime: shiny
 ---
 
@@ -87,11 +88,15 @@ leaderboard_df %>%
             details = function(index){
               sub_table <- leaderboard_df %>% 
                 slice(index) %>% 
-                select(image, num_predictions, start_year, description, source)
+                select(image, description, num_predictions, start_year, source)
               reactable(sub_table,
+                        defaultColDef = colDef(headerVAlign = 'bottom'),
                         columns = list(image = colDef(name = 'Photo',
-                                                      style = background_img(),
-                                                      width = 200),
+                                                      cell = function(value) {
+                                                        tags$img(src = value,
+                                                                 width = 400)
+                                                        },
+                                                      width = 420),
                                        description = colDef(name = "Description",
                                                             width = 400),
                                        source = colDef(name = 'Source',
@@ -103,7 +108,7 @@ leaderboard_df %>%
                                        start_year = colDef(name = "First Year Prognosticating")))
             },
             height = 800,
-            width = 1000,
+            #width = 1400,
             highlight = TRUE,
             defaultPageSize = 15,
             filterable = TRUE,
