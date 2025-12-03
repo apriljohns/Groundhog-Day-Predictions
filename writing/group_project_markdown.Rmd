@@ -13,8 +13,8 @@ pull in raw data
 ```{r}
 library(tidyverse)
 
-groundhogs_raw <- read_csv('../data/groundhogs_raw.csv')
-predictions_raw <- read_csv('../data/predictions_raw.csv')
+groundhogs_raw <- read_csv('../data/groundhogs_2025.csv')
+predictions_raw <- read_csv('../data/predictions_2025.csv')
 ```
 
 exploring the data
@@ -98,7 +98,7 @@ avg_daily_temp_unnested <- avg_daily_temp %>%
   unnest(avg_temp)
 
 # save in data folder so we don't need to run it fresh every time (it takes a while)
-write_csv(avg_daily_temp_unnested, file = '../data/average_daily_temp.csv')
+write_csv(avg_daily_temp_unnested, file = '../data/average_daily_temp_2025.csv')
 
 # the code above only needs to be run once, but I'll leave it here for now so 
 # that you can see where it came from 
