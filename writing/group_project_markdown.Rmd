@@ -89,7 +89,7 @@ avg_daily_temp <- groundhogs_raw %>%
                          ~get_power(community = "ag",
                                     lonlat = c(.x, .y),
                                     pars = c("T2M"),
-                                    dates = c("1981-01-01", "2024-01-31"),
+                                    dates = c("1981-01-01", "2025-07-01"),
                                     temporal_api = "daily")))
 
 # unnest data 
