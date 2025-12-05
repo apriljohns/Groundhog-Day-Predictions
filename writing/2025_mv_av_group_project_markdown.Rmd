@@ -210,13 +210,26 @@ rolling_avg_hognames <- rolling_avg_hognames %>%
 ```
 #make the widget
 Back to the drawing board after some less than ideal plots in the pre-2025
-version of the script.
-```{r}
+version of the script. Do accuracy divided by region of country.  Have to find
+1) A traditional way of dividing states into regions, put that into a df
+Try using the Koppen-Geiger system to classify based on lat and long.
+2) Mutate a new column with the region. Change name of "region" in original 
+data to "state". 
+which is really state in the original data.
+3) Do a plotly that selects regions worth of plot lines and grays out the
+unselected regions. This may have to use gghighlight w/ ggplotly
 
+I was able to get a list of Koppen climate zones for each latitude/longitude
+pair using an AI tool. The APIs that I found for this would not work for me,
+and nor would the tool that uses TIF files. I spent easily 5 hours trying
+to get this to work, and I could have spent those 5 hours doing the process
+manually for just 88 prognosticators. Needed to move on with the project...
+The file is in the data folder.
 
-
-
-
+Plan is to:
+1. Join Koppen climate zones with groundhogs_2025
+2. Use Plotly to show moving averages grouped by Koppen climate zone
+3. Ideally use gghighlight to gray-out the unselected groups
 
 
 
