@@ -249,7 +249,7 @@ button_list <- list(
   list(method = "restyle",
        args = list("visible", as.list(rep(TRUE,
                                           length(foo_consolidated_names)))),
-       label = "ALl Series")
+       label = "All Series")
 )
 
 for(i in seq_along(foo_consolidated_names)) {
@@ -267,8 +267,10 @@ for(i in seq_along(foo_consolidated_names)) {
 p_fc <- p_fc %>%
   layout(
     title = "5 year rolling average for proportion correct",
-    xaxis = list(title = "Date"),
-    yaxis = list(title = "Value"),
+    xaxis = list(title = "Date",
+                 fixedrange = TRUE),
+    yaxis = list(title = "Value",
+                 fixedrange = TRUE),
     updatemenus = list(
       list(
         y = 1.15,
