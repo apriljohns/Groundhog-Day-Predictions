@@ -231,6 +231,31 @@ Plan is to:
 2. Use Plotly to show moving averages grouped by Koppen climate zone
 3. Ideally use gghighlight to gray-out the unselected groups
 
+```{r}
+# Join Koppen zones with groundhog locations
+koppen <- read_csv("../data/koppen_classifications.csv")
 
+a <-  groundhogs_raw %>%
+  left_join(koppen, join_by(id ==Index), keep = FALSE)
+
+#Need to get everything into one df! Take the rolling avg df and use the a df to
+#lookup values for groundhog names and koppen zones. We will tidy up after this
+#step
+
+b <-  rolling_avg %>% 
+  left_join(a, join_by(id))
+
+#clean up this mess to get only the columns needed for the plot
+
+rolling_avg_df <- b %>% 
+  select(id, year, name, rolling_mean, `Climate Description`)
+
+
+```
+Below for the actual plot
+
+```{r}
+
+```
 
 
