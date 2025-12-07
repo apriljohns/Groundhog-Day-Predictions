@@ -260,19 +260,40 @@ description.
 
 Image could be bar graph with prognosticators grouped within climate type.
 each of the respective climate types can also display a bar each for the deltas
-above.
+above. Or.. Instead of a bar for each of the deltas, display a bar for 
+"local model consistency" defined as proportion of years where "6 more weeks" 
+by our model is true.
 
 
 ```{r}
 #summarize data by Koppen classification and name
 
-b %>%
+accuracy_plot_data <- b %>% 
   group_by(`Climate Description`, name) %>% 
-  summarise(avg_winter_delta = mean(delta_winter),
-            avg_spring_delta = mean(delta_spring),
-            accuracy = sum(is_correct, na.rm = TRUE)/n())
+  summarise(accuracy = sum(is_correct, na.rm = TRUE)/n(),
+            local_consistency = sum(six_more_weeks/n())) %>% 
+  ungroup()
 
-#work on bar graph on Monday!!!!
+#try plotly for grouped bar chart
+
+library(plotly)
+
+accuracy_plot <- plot_ly(accuracy_plot_data,
+                         x = ~`Climate Description`,
+                         y = ~accuracy,
+                         type = 'bar',
+                         name = 'accuracy')
+accuracy_plot <- accuracy_plot %>% 
+  add_trace(y = ~local_consistency, name = 'local consistency')
+accuracy_plot <- accuracy_plot %>% 
+  layout(yaxis = list(title = 'Proportion correct or consistent'),
+         barmode = 'group')
+
+#This is not showing the individual pronosticators within each Koppen zone
+#nor is it showing the scale of the y-axis correctly: fix on 12/8.
+
+
+accuracy_plot
 
   
 ```
