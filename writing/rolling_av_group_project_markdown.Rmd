@@ -249,7 +249,7 @@ button_list <- list(
   list(method = "restyle",
        args = list("visible", as.list(rep(TRUE,
                                           length(foo_consolidated_names)))),
-       label = "ALl Series")
+       label = "All Series")
 )
 
 for(i in seq_along(foo_consolidated_names)) {
@@ -267,8 +267,10 @@ for(i in seq_along(foo_consolidated_names)) {
 p_fc <- p_fc %>%
   layout(
     title = "5 year rolling average for proportion correct",
-    xaxis = list(title = "Date"),
-    yaxis = list(title = "Value"),
+    xaxis = list(title = "Date",
+                 fixedrange = TRUE),
+    yaxis = list(title = "Value",
+                 fixedrange = TRUE),
     updatemenus = list(
       list(
         y = 1.15,
@@ -279,6 +281,62 @@ p_fc <- p_fc %>%
   )
 
 p_fc
+```
+Well, shiiiiittttttt. The above was cool, but below I will rearrange the
+foo_consolidated dataframe into tidy format, make a ggplot, and then
+try to get ggplotly to work so I can incorporate gghighlight
+```{r plotly attempt}
+library(gghighlight)
+
+#pivot longer for tidyness; change NaNs to NAs just in case
+foo_consolidated_tidy <- foo_consolidated %>% 
+  pivot_longer(cols = -1, names_to = "prognosticator", values_to = "rolling_avg_5" )
+foo_consolidated_tidy <- foo_consolidated_tidy %>% 
+  mutate(across(3, ~na_if(., NaN)))
+
+ggplot(foo_consolidated_tidy) +
+  geom_line(aes(x = year, y = rolling_avg_5, colour = prognosticator))
+#meh
+
+# #BELOW ALSO SUCKS, SO COMMENTING OUT FOR NOW
+
+# # Create plotly figure with custom highlighting
+# fig <- plot_ly()
+# 
+# # Add each category as a separate trace
+# for(cat in unique(foo_consolidated_tidy$prognosticator)) {
+#   cat_data <- foo_consolidated_tidy %>% filter(prognosticator == cat)
+#   
+#   fig <- fig %>%
+#     add_trace(
+#       data = cat_data,
+#       x = ~year,
+#       y = ~rolling_avg_5,
+#       type = 'scatter',
+#       mode = 'lines+markers',
+#       name = cat,
+#       visible = TRUE,  # All visible by default
+#       line = list(width = 2),
+#       marker = list(size = 8)
+#     )
+# }
+# 
+# # Update layout with dropdown menu for highlighting
+# fig <- fig %>%
+#   layout(
+#     title = "5 yr rolling Avg (use legend to toggle)",
+#     xaxis = list(title = "Year"),
+#     yaxis = list(title = "Accuracy"),
+#     hovermode = 'closest',
+#     legend = list(
+#       itemclick = "toggle",      
+#       itemdoubleclick = "toggleothers"
+#     )
+#   )
+# 
+# fig
+
+
 
 ```
 

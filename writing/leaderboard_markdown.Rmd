@@ -17,9 +17,9 @@ library(htmltools)
 library(scales)
 
 # pull in raw data 
-groundhogs_raw <- read_csv('../data/groundhogs_raw.csv')
-predictions_raw <- read_csv('../data/predictions_raw.csv')
-avg_daily_temp_df <- read_csv('../data/average_daily_temp.csv')
+groundhogs_raw <- read_csv('../data/groundhogs_2025.csv')
+predictions_raw <- read_csv('../data/predictions_2025.csv')
+avg_daily_temp_df <- read_csv('../data/average_daily_temp_2025.csv')
 ```
 
 ```{r}
@@ -62,8 +62,7 @@ leaderboard_df <- prediction_eval_df %>%
             accuracy = sum(is_correct)/n(),
             start_year = min(year)) %>% 
   arrange(desc(accuracy)) %>% 
-  mutate(rank = row_number(),
-         accuracy = round(accuracy, digits = 3)) %>% 
+  mutate(rank = row_number()) %>% 
   left_join(groundhogs_raw, by = 'id') 
   
 # use reactable to make interactive leaderboard 
@@ -80,7 +79,7 @@ leaderboard_df %>%
                                          }),
                            accuracy = colDef(name = "Accuracy",
                                                  cell = data_bars(., text_position = 'above',
-                                                                  number_fmt = percent_format(),
+                                                                  number_fmt = percent_format(accuracy = 0.1),
                                                                   fill_color = 'steelblue', background = 'lightgrey')),
                            region = colDef(name = "State/Province"),
                            url = colDef(show = FALSE)),
@@ -115,3 +114,5 @@ leaderboard_df %>%
             searchable = TRUE)
 
 ```
+
+
