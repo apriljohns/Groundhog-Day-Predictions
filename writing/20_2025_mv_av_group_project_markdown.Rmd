@@ -19,17 +19,17 @@ predictions_raw <- read_csv('../data/predictions_2025.csv')
 
 exploring the data
 ```{r}
-# we have predictions from 1886 - 2023 
-predictions_raw %>% 
-  pull(year) %>% 
-  range()
-
-# number of predictions (aka prognosticating groundhogs) over the years 
-predictions_raw %>% 
-  group_by(year) %>% 
-  count() %>% 
-  ggplot() +
-  geom_line(aes(x = year, y = n))
+# # we have predictions from 1886 - 2023 
+# predictions_raw %>% 
+#   pull(year) %>% 
+#   range()
+# 
+# # number of predictions (aka prognosticating groundhogs) over the years 
+# predictions_raw %>% 
+#   group_by(year) %>% 
+#   count() %>% 
+#   ggplot() +
+#   geom_line(aes(x = year, y = n))
 ```
 
 uptick in predictions around this time: 
@@ -182,16 +182,16 @@ prediction_eval_df <- prediction_eval_df %>%
 
 #calculate the rolling average for accuracy
 ```{r}
-#group by groundhog
-rolling_avg <- prediction_eval_df %>% 
-  group_by(id) %>% 
-  arrange(year) %>% 
-  mutate(rolling_mean = (is_correct +
-              lag(is_correct, 1) +
-              lag(is_correct, 2) +
-              lag(is_correct, 3) +
-              lag(is_correct, 4)) / 5) %>% 
-  ungroup()
+# #group by groundhog
+# rolling_avg <- prediction_eval_df %>% 
+#   group_by(id) %>% 
+#   arrange(year) %>% 
+#   mutate(rolling_mean = (is_correct +
+#               lag(is_correct, 1) +
+#               lag(is_correct, 2) +
+#               lag(is_correct, 3) +
+#               lag(is_correct, 4)) / 5) %>% 
+#   ungroup()
 
 
 
@@ -199,14 +199,14 @@ rolling_avg <- prediction_eval_df %>%
 ```
 #join with groundhog names for IDs, because that will be nice for the graphic
 ```{r}
-rolling_avg_hognames <- rolling_avg %>% 
-  left_join(groundhogs_raw %>%
-              select(id, slug, region), by = "id")
-
-#reorder columns
-rolling_avg_hognames <- rolling_avg_hognames %>% 
-  relocate(slug, .after = id) %>% 
-  relocate(region, .after = slug)
+# rolling_avg_hognames <- rolling_avg %>% 
+#   left_join(groundhogs_raw %>%
+#               select(id, slug, region), by = "id")
+# 
+# #reorder columns
+# rolling_avg_hognames <- rolling_avg_hognames %>% 
+#   relocate(slug, .after = id) %>% 
+#   relocate(region, .after = slug)
 ```
 #make the widget
 Back to the drawing board after some less than ideal plots in the pre-2025
@@ -227,42 +227,6 @@ Plan is to:
 1. Join Koppen climate zones with groundhogs_2025
 2. Use Plotly to show moving averages grouped by Koppen climate zone
 3. Ideally use gghighlight to gray-out the unselected groups
-
-```{r}
-# Join Koppen zones with groundhog locations
-koppen <- read_csv("../data/koppen_classifications.csv")
-
-a <-  groundhogs_raw %>%
-  left_join(koppen, join_by(id == Index), keep = FALSE)
-
-#Need to get everything into one df! Take the rolling avg df and use the a df to
-#lookup values for groundhog names and koppen zones. We will tidy up after this
-#step
-
-b <-  rolling_avg %>% 
-  left_join(a, join_by(id))
-
-#clean up this mess to get only the columns needed for the plot
-
-rolling_avg_df <- b %>% 
-  select(id, year, name, rolling_mean, `Climate Description`)
-
-
-```
-Another idea instead of the mvg_avg is to just plot average accuracy by 
-Koppen climate zone or perhaps other climate zone classification systems?? 
-Dataframe "b" above has all of the needed columns to do this.
-Cool idea? Add columns for avg delta winter and delta spring for each climate
-description.
-
-Image could be bar graph with prognosticators grouped within climate type.
-each of the respective climate types can also display a bar each for the deltas
-above. Or.. Instead of a bar for each of the deltas, display a bar for 
-"local model consistency" defined as proportion of years where "6 more weeks" 
-by our model is true.
-
-Hold the phone - found an actual R package that can fetch Koppen climate zones
-"KGC"
 
 ```{r}
 library(kgc)
@@ -297,7 +261,34 @@ koppen_legit <- koppen_from_kgc %>% left_join(us_can_koppen_lookup,
 
 #join koppen_legit with the groundhogs
 
+a <- left_join(x = groundhogs_raw, y = koppen_legit, by = "id")
+
+#join with the prediction eval df
+
+b <- left_join(x = prediction_eval_df, a, by = "id")
+
+#get what is needed for the plot from this unholy mess of a df
+
+c <- b %>% 
+  select(climate_type, name, is_correct, six_more_weeks)
+
+
 ```
+Another idea instead of the mvg_avg is to just plot average accuracy by 
+Koppen climate zone or perhaps other climate zone classification systems?? 
+Dataframe "b" above has all of the needed columns to do this.
+Cool idea? Add columns for avg delta winter and delta spring for each climate
+description.
+
+Image could be bar graph with prognosticators grouped within climate type.
+each of the respective climate types can also display a bar each for the deltas
+above. Or.. Instead of a bar for each of the deltas, display a bar for 
+"local model consistency" defined as proportion of years where "6 more weeks" 
+by our model is true.
+
+Hold the phone - found an actual R package that can fetch Koppen climate zones
+"KGC"
+
 
 ```{r}
 #summarize data by Koppen classification and name
@@ -312,9 +303,10 @@ koppen_legit <- koppen_from_kgc %>% left_join(us_can_koppen_lookup,
 #Given that the most inconsistent "six more weeks" is defined as 50/50,
 #we are taking the difference from 0.5 to score consistency, so the lower the
 #number, the more INCONSISTENT. However, in wanting to calculate an adjusted
-#accuracy, we are taking 1 minus this value to use as a multiplier so the 
+#accuracy, we are taking 1 minus this value to use as a multiplier so the
 #higher the number, the more inconsistent, which is more useful as a multiplier
 #for creating an adjusted accuracy calculation for our prognosticators.
+
 
 #Create the summary dataframe of our dreams
 accuracy_plot_data <- b %>% 
@@ -326,26 +318,60 @@ accuracy_plot_data <- b %>%
   ungroup()
 
 
-
-#generate a bar plot with each prognosticator having a pair of bars:
-# 1 - consistency
-# 2 - stacked with accuracy and adjusted accuracy
-#plot will be faceted by Koppen Zone
-
-#Tidy that S@!t up
-pl_accuracy_plot_data <- accuracy_plot_data %>% 
-  pivot_longer(cols = c(accuracy, consistency, adj_accuracy),
-               names_to = "prognosticator and climate parameter",
-               values_to = "coefficients")
-
-#try to plot it - yikes
-
-
-
+#
+#
+#
+# #generate a bar plot with each prognosticator having a pair of bars:
+# # 1 - consistency
+# # 2 - stacked with accuracy and adjusted accuracy
+# #plot will be faceted by Koppen Zone
+#
+# #Tidy that S@!t up
+# pl_accuracy_plot_data <- accuracy_plot_data %>%
+#   pivot_longer(cols = c(accuracy, consistency, adj_accuracy),
+#                names_to = "prognosticator and climate parameter",
+#                values_to = "coefficients")
+#
+# #try to plot it - yikes
+#
+# # Separate the datasets into each parameter
+# df_consistency <- pl_accuracy_plot_data %>%
+#   filter(`prognosticator and climate parameter` == "consistency")
+#
+# df_accuracy <- pl_accuracy_plot_data %>%
+#   filter(`prognosticator and climate parameter` == "accuracy")
+#
+# df_adj_accuracy <- pl_accuracy_plot_data %>%
+#   filter(`prognosticator and climate parameter` == "adj_accuracy")
+#
+# # Create the plot
+# ggplot() +
+#   geom_col(data = df_consistency,
+#            aes(x = name, y = coefficients, fill = `prognosticator and climate parameter`),
+#            position = position_nudge(x = -0.2), width = 0.35) +
+#   geom_col(data = df_accuracy,
+#            aes(x = name, y = coefficients, fill = `prognosticator and climate parameter`),
+#            position = position_nudge(x = 0.2), width = 0.35) +
+#   geom_col(data = df_adj_accuracy,
+#            aes(x = name, y = coefficients, fill = `prognosticator and climate parameter`),
+#            position = position_nudge(x = 0.2), width = 0.35) +
+#   facet_wrap(~ `Climate Description`, scales = "free_x") +
+#   labs(
+#     title = "Prognosticator XYZ",
+#     x = "Name",
+#     y = "Coefficient Value",
+#     fill = "Metric"
+#   ) +
+#   theme_minimal() +
+#   theme(
+#     axis.text.x = element_text(angle = 45, hjust = 1),
+#     legend.position = "bottom"
+#   )
+#
 
                     
                     
-                  
+                   
 ```
 
 
