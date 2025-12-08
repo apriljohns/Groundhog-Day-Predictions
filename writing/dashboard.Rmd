@@ -23,7 +23,7 @@ Column {data-width=600}
 
 ### Map of US and Canada
 
-### New England Zoom
+### New England
 
 Leader Board
 ============================================================================

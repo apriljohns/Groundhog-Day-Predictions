@@ -42,3 +42,10 @@ predictions <- groundhogs_all |>
   tidyr::unnest_wider(predictions) |> 
   dplyr::mutate(shadow = as.logical(shadow))
 
+readr::write_csv(
+  groundhogs, 
+  file = "data/groundhogs_2025.csv")
+
+readr::write_csv(
+  predictions,
+  file = "data/predictions_2025.csv")
