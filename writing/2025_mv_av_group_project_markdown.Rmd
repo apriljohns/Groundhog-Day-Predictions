@@ -300,34 +300,33 @@ koppen_from_kgc %>% left_join(us_can_koppen_lookup,
 ```{r}
 #summarize data by Koppen classification and name
 
+#accuracy index is accuracy (range 0 - 1)/ consistency (range 0 - 0.5)
+#What this does is gives an indicator of how accurate the prognosticator is
+#adjusted for consistency of climate as defined by our "6 more weeks model".
+#Do bar charts with accuracy, consistency, and accuracy index faceted by
+#Koppen Zone.
+
+#Put in 
+
 accuracy_plot_data <- b %>% 
   group_by(`Climate Description`, name) %>% 
   summarise(accuracy = sum(is_correct, na.rm = TRUE)/n(),
-            local_consistency = sum(six_more_weeks/n())) %>% 
-  ungroup()
+            consistency = abs(0.5 - sum(six_more_weeks)/n()),
+            accuracy_index = accuracy / consistency)
 
-#try plotly for grouped bar chart
-
+#pivot longer
 library(plotly)
-
-accuracy_plot <- plot_ly(accuracy_plot_data,
-                         x = ~`Climate Description`,
-                         y = ~accuracy,
-                         type = 'bar',
-                         name = 'accuracy')
-accuracy_plot <- accuracy_plot %>% 
-  add_trace(y = ~local_consistency, name = 'local consistency')
-accuracy_plot <- accuracy_plot %>% 
-  layout(yaxis = list(title = 'Proportion correct or consistent'),
-         barmode = 'group')
-
-#This is not showing the individual pronosticators within each Koppen zone
-#nor is it showing the scale of the y-axis correctly: fix on 12/8.
+foo_plot <- ggplot(accuracy_plot_data,
+                    x = ~name,
+                    y = ~accuracy,
+                    z = ~accuracy_index,
+                    type = "bar",
+                    color = ~accuracy_index)
 
 
-accuracy_plot
-
-  
+                    
+                    
+                  
 ```
 
 
