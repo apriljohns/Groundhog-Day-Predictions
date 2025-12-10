@@ -255,16 +255,23 @@ Hold the phone - found an actual R package that can fetch Koppen climate zones
 #higher the number, the more inconsistent, which is more useful as a multiplier
 #for creating an adjusted accuracy calculation for our prognosticators.
 
-
+# Awesome idea from Molly - arrange in quartiles
 #Create the summary dataframe of our dreams
-accuracy_plot_data <- c %>% 
-  group_by(climate_type, name) %>% 
+accuracy_plot_data <- c %>%
+  group_by(name) %>% 
   summarise(accuracy = sum(is_correct, na.rm = TRUE)/n(),
             consistency = abs(0.5 - sum(six_more_weeks)/n()),
             adj_accuracy = accuracy * (1 - consistency)) %>% 
-  arrange(climate_type, desc(adj_accuracy)) %>% 
+  arrange(consistency) %>% #ascending order for consistency
   ungroup()
 
+ranks <- c(1:88) #vector for ranks and bind below
+
+accuracy_plot_data_ranked <- cbind(accuracy_plot_data, ranks)
+
+#Divide into consistency quartiles - these will just show
+#accuracy and adjusted accuracy
+#Do scatterplot of accuracy vs consistency
 
 
 
@@ -279,6 +286,7 @@ pl_accuracy_plot_data <- accuracy_plot_data %>%
   pivot_longer(cols = c(accuracy, consistency, adj_accuracy),
                names_to = "prognosticator_and_climate_parameter",
                values_to = "coefficients")
+
 
 #try to plot it - yikes
 
