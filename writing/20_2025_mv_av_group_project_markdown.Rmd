@@ -269,6 +269,19 @@ ranks <- c(1:88) #vector for ranks and bind below
 
 accuracy_plot_data_ranked <- cbind(accuracy_plot_data, ranks)
 
+#determine cuts for quartiles
+consist_quartiles <- accuracy_plot_data_ranked %>% pull(consistency) %>% 
+  quantile()
+
+#apply quartile cuts to data
+foo <- accuracy_plot_data_ranked %>% 
+  mutate(quartile = cut(consistency,
+          breaks=c(0.02941176, 0.32121212, 0.40909091, 0.45454545, 0.5), 
+          include.lowest=TRUE, 
+          labels=c("0", "25", "50", "75"), 
+          ordered_result = TRUE))
+         
+
 #Divide into consistency quartiles - these will just show
 #accuracy and adjusted accuracy
 #Do scatterplot of accuracy vs consistency
