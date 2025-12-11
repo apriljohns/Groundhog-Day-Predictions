@@ -302,7 +302,7 @@ df_accuracy <- pl_accuracy_plot_data %>%
 df_adj_accuracy <- pl_accuracy_plot_data %>%
   filter(prognosticator_and_climate_parameter == "adj_accuracy")
 
-# Create the plot
+# Create the plot for the quartiles
 ggplot() +
   geom_col(data = df_accuracy,
            aes(x = reorder(name, -coefficients),
@@ -323,6 +323,13 @@ ggplot() +
     axis.text.x = element_text(angle = 45, hjust = 1),
     legend.position = "bottom"
   )
+
+ 
+#Create the plot and for consistency vs accuracy
+foo %>% ggplot(aes(x = consistency, y = accuracy, colour = name)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE, colour = "black") +
+  theme(legend.position = "none")
 
 
                     
