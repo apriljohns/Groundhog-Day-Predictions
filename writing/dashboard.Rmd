@@ -145,7 +145,7 @@ Rolling Average
 Column {data-width=600}
 -------------------------------------
     
-### Rolling Average
+### Seasonal Consistency and Prognosticator Accuracy
 
 Documentation
 ============================================================================
