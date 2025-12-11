@@ -278,7 +278,7 @@ foo <- accuracy_plot_data_ranked %>%
   mutate(quartile = cut(consistency,
           breaks=c(0.02941176, 0.32121212, 0.40909091, 0.45454545, 0.5), 
           include.lowest=TRUE, 
-          labels=c("0", "25", "50", "75"), 
+          labels=c("Quartile 1", "Quartile 2", "Quartile 3", "Quartile 4"), 
           ordered_result = TRUE))
          
 
@@ -303,7 +303,7 @@ df_adj_accuracy <- pl_accuracy_plot_data %>%
   filter(prognosticator_and_climate_parameter == "adj_accuracy")
 
 # Create the plot for the quartiles
-ggplot() +
+quartile_plot <- ggplot() +
   geom_col(data = df_accuracy,
            aes(x = reorder(name, -coefficients),
                y = coefficients, fill = prognosticator_and_climate_parameter),
@@ -314,25 +314,36 @@ ggplot() +
   facet_wrap(~ quartile, scales = "free_x") +
   labs(
     title = "Consistency quartiles",
-    x = "Name",
-    y = "Coefficient Value",
+    x = " ",
+    y = "Proportion Accurate",
     fill = "Metric"
   ) +
+  scale_fill_discrete(labels = c("Accuracy", "Adjusted Accuracy")) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1),
     legend.position = "bottom"
   )
 
- 
+
+#fit a linear regression for accuracy by consistency and get the 
+#R-squared to plot in the figure
+
+foo_lm <- lm(foo$accuracy ~ foo$consistency)
+summary(foo_lm)
+
 #Create the plot and for consistency vs accuracy
-foo %>% ggplot(aes(x = consistency, y = accuracy, colour = name)) +
+consist_plot <- foo %>% ggplot(aes(x = consistency, y = accuracy, colour = name)) +
   geom_point() +
-  geom_smooth(method = "lm", se = TRUE, colour = "black") +
-  theme(legend.position = "none")
+  geom_smooth(method = "lm", se = FALSE, colour = "black") +
+  theme(legend.position = "none") +
+  annotate("text", x = .13, y = .335, label = "italic(R)^2 == .35",
+           parse = TRUE, size = 5, angle = 6.5) +
+  labs(x = "Early Spring Consistency at Prognoticator Location",
+       y = "Pronosticator Accuracy")
+  
 
 
-                    
                     
                    
 ```
