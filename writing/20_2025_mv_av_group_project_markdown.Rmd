@@ -329,15 +329,33 @@ quartile_plot <- ggplot() +
 #fit a linear regression for accuracy by consistency and get the 
 #R-squared to plot in the figure
 
-foo_lm <- lm(foo$accuracy ~ foo$consistency)
-summary(foo_lm)
+# foo_lm <- lm(foo$accuracy ~ foo$consistency)
+# summary(foo_lm)
+# 
+# Call:
+# lm(formula = foo$accuracy ~ foo$consistency)
+# 
+# Residuals:
+#     Min      1Q  Median      3Q     Max 
+# -0.4087 -0.1305 -0.0048  0.1499  0.5375 
+# 
+# Coefficients:
+#                 Estimate Std. Error t value Pr(>|t|)    
+# (Intercept)      0.25813    0.06633   3.891 0.000196 ***
+# foo$consistency  0.30111    0.17067   1.764 0.081239 .  
+# ---
+# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+# 
+# Residual standard error: 0.1996 on 86 degrees of freedom
+# Multiple R-squared:  0.03493,	Adjusted R-squared:  0.02371 
+# F-statistic: 3.113 on 1 and 86 DF,  p-value: 0.08124
 
 #Create the plot and for consistency vs accuracy
 consist_plot <- foo %>% ggplot(aes(x = consistency, y = accuracy, colour = name)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE, colour = "black") +
   theme(legend.position = "none") +
-  annotate("text", x = .13, y = .335, label = "italic(R)^2 == .35",
+  annotate("text", x = .13, y = .335, label = "italic(R)^2 == .035",
            parse = TRUE, size = 5, angle = 6.5) +
   labs(x = "Early Spring Consistency at Prognoticator Location",
        y = "Pronosticator Accuracy")
