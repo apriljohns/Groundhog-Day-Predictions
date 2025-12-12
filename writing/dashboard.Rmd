@@ -228,7 +228,6 @@ quartile_plot <- ggplot() +
            aes(x = name, y = coefficients, fill = prognosticator_and_climate_parameter),
            position = position_nudge(x = 0.0), width = 0.35) +
   facet_wrap(~ quartile, scales = "free_x") +
-  theme(strip.text.y.left = element_text(angle = 0)) +
   labs(
     title = "Consistency quartiles",
     x = " ",
@@ -238,8 +237,11 @@ quartile_plot <- ggplot() +
   scale_fill_discrete(labels = c("Accuracy", "Adjusted Accuracy")) +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    legend.position = c(0.5, -.20), legend.direction = "horizontal")
+    axis.text.x = element_text(size = 4, angle = 45, hjust = 1),
+    axis.text.y = element_text(size = 5),
+    axis.title.y = element_text(size = 10),
+    legend.position = c(0.5, -.20), legend.direction = "horizontal",
+    legend.text = element_text(size = 5))
 
 
 #fit a linear regression for accuracy by consistency and get the 
@@ -269,23 +271,27 @@ quartile_plot <- ggplot() +
 #Create the plot and for consistency vs accuracy
 consist_plot <- foo %>% ggplot(aes(x = consistency, y = accuracy, colour = name)) +
   geom_point() +
-  geom_smooth(method = "lm", se = FALSE, colour = "black") +
+  geom_smooth(method = "lm", se = FALSE, colour = "black", linewidth = .3) +
   theme(legend.position = "none") +
-  annotate("text", x = .13, y = .33, label = "italic(R)^2 == .035",
-           parse = TRUE, size = 4, angle = 10.5) +
+  annotate("text", x = .13, y = .36, label = "italic(R)^2 == .035",
+           parse = TRUE, size = 3, angle = 10.5) +
   labs(x = "Early Spring Consistency\n at Prognoticator Location",
        y = "Pronosticator Accuracy") +
-  theme(axis.title.x = element_text(vjust = 25))
+  theme(axis.title.x = element_text(size = 8, vjust = 3),
+        axis.title.y = element_text(size = 8))
   
   
 
 library(patchwork)
 
+#reduce margin of consist_plot
+
+combined_plot <- consist_plot + quartile_plot
+  
+
+
 #bring plots together
-combined_plot <- quartile_plot + 
-  (plot_spacer() + consist_plot + plot_spacer() + 
-   plot_layout(widths = c(0.1, 1, 0.1))) + 
-  plot_layout(widths = c(2, 1))
+
 
 
 print(combined_plot)
