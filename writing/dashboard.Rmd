@@ -236,12 +236,13 @@ quartile_plot <- ggplot() +
   ) +
   scale_fill_discrete(labels = c("Accuracy", "Adjusted Accuracy")) +
   theme_minimal() +
+  guides(color = guide_legend(override.aes = list(size = 10))) +
   theme(
     axis.text.x = element_text(size = 6, angle = 45, hjust = 1),
     axis.text.y = element_text(size = 8),
     axis.title.y = element_text(size = 10),
-    legend.position = c(0.5, -.20), legend.direction = "horizontal",
-    legend.text = element_text(size = 5))
+    legend.position = c(0.5, -.25), legend.direction = "horizontal",
+    legend.text = element_text(size = 8))
 
 
 #fit a linear regression for accuracy by consistency and get the 
@@ -269,7 +270,7 @@ quartile_plot <- ggplot() +
 # F-statistic: 3.113 on 1 and 86 DF,  p-value: 0.08124
 
 #Create the plot and for consistency vs accuracy
-consist_plot <- foo %>% ggplot(aes(x = consistency, y = accuracy, colour = name)) +
+consist_plot <- foo %>% ggplot(aes(x = consistency, y = accuracy, colour = quartile)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE, colour = "black", linewidth = .3) +
   theme(legend.position = "none") +
@@ -277,8 +278,8 @@ consist_plot <- foo %>% ggplot(aes(x = consistency, y = accuracy, colour = name)
            parse = TRUE, size = 3, angle = 7.7) +
   labs(x = "Early Spring Consistency\n at Prognoticator Location",
        y = "Pronosticator Accuracy") +
-  theme(axis.title.x = element_text(size = 8, vjust = 3),
-        axis.title.y = element_text(size = 8))
+  theme(axis.title.x = element_text(size =10, vjust = 3),
+        axis.title.y = element_text(size = 10))
   
   
 
