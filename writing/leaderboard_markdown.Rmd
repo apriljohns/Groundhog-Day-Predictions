@@ -1,12 +1,19 @@
 ---
 title: "Groundhog Leaderboard"
 #output: html_document
-output: flexdashboard::flex_dashboard
-runtime: shiny
+output:
+  flexdashboard::flex_dashboard
+css: ../styling/styles.css
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+```
+
+```{r}
+library(flexdashboard)
+library(bslib)
+
 ```
 
 ```{r}
@@ -21,6 +28,8 @@ groundhogs_raw <- read_csv('../data/groundhogs_2025.csv')
 predictions_raw <- read_csv('../data/predictions_2025.csv')
 avg_daily_temp_df <- read_csv('../data/average_daily_temp_2025.csv')
 ```
+
+### {#leaderboard}
 
 ```{r}
 # data frame with average winter temp (6 weeks preceding groundhog day)
@@ -66,12 +75,12 @@ leaderboard_df <- prediction_eval_df %>%
   left_join(groundhogs_raw, by = 'id') 
   
 # use reactable to make interactive leaderboard 
-
 leaderboard_df %>% 
   select(rank, name, accuracy, type, city, region, country) %>%
   reactable(theme = fivethirtyeight(),
             defaultColDef = colDef(align = "center",
-                                   headerStyle = list(background = "lightblue")),
+                                   headerStyle = list(background = "#565A0480",
+                                                      fontSize = "15px")),
             columns = list(name = colDef(name = 'Name',
                                          cell = function(value, index) {
                                            url <- leaderboard_df$source[index]
@@ -80,39 +89,49 @@ leaderboard_df %>%
                            accuracy = colDef(name = "Accuracy",
                                                  cell = data_bars(., text_position = 'above',
                                                                   number_fmt = percent_format(accuracy = 0.1),
-                                                                  fill_color = 'steelblue', background = 'lightgrey')),
-                           region = colDef(name = "State/Province"),
+                                                                  fill_color = '#8A1A6B', background = '#EFD6C1')),
+                           region = colDef(name = "State/Province",
+                                           width = 150),
+                           rank = colDef(minWidth = 50),
                            url = colDef(show = FALSE)),
             onClick = 'expand',
             details = function(index){
+              
               sub_table <- leaderboard_df %>% 
                 slice(index) %>% 
-                select(image, description, num_predictions, start_year, source)
+                select(image, description, num_predictions, start_year, source) 
+              
               reactable(sub_table,
-                        defaultColDef = colDef(headerVAlign = 'bottom'),
+                        style = list(opacity = 0.99),
+                        defaultColDef = colDef(headerVAlign = 'bottom',
+                                               headerStyle = list(background = "#FFFFFF80",
+                                                                  textAlign = "left",
+                                                                  overflowWrap = "normal")),
                         columns = list(image = colDef(name = 'Photo',
                                                       cell = function(value) {
                                                         tags$img(src = value,
-                                                                 width = 400)
+                                                                 width = 300)
                                                         },
-                                                      width = 420),
+                                                      width = 320),
                                        description = colDef(name = "Description",
-                                                            width = 400),
-                                       source = colDef(name = 'Source',
-                                                       cell = function(value, index) {
-                                                         url <- leaderboard_df$source[index]
-                                                         tags$a(href = url, value)
-                                                         }),
-                                       num_predictions = colDef(name = "Total Number of Predictions"),
-                                       start_year = colDef(name = "First Year Prognosticating")))
+                                                            minWidth = 240,
+                                                            cell = function(value, index) {
+                                                              url <- sub_table$source[index]
+                                                              tagList(value, tags$br(), tags$br(), tags$a("Source", href = url))}),
+                                       num_predictions = colDef(name = "Total Predictions",
+                                                                minWidth = 90,
+                                                                align = "left"),
+                                       start_year = colDef(name = "First Year Prognosticating",
+                                                           minWidth = 120,
+                                                           align = "left"),
+                                       source = colDef(show = FALSE)))
             },
-            height = 800,
-            #width = 1400,
             highlight = TRUE,
             defaultPageSize = 15,
             filterable = TRUE,
-            searchable = TRUE)
-
+            searchable = TRUE,
+            class = "leaderboard-rt",
+            rowClass = "my-row") %>% 
+  add_title("Groundhog Leaderboard", font_size = 30) %>% 
+  add_subtitle("Prognosticator Ranks by Overall Weather Prediction Accuracy", font_size = 20, font_color = 'darkgrey')
 ```
-
-

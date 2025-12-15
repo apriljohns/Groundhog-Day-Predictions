@@ -1,0 +1,128 @@
+
+body {
+  background-color: #3c0037 !important;
+  background-size: cover;   
+  border-color: transparent
+}
+
+.navbar{
+background-image:
+    url('../styling/pine_long_left.png'),
+    url('../styling/flowers_long_right.png');
+
+  background-position:
+    left center,
+    right center;
+
+  background-size:
+    auto 150px,
+    auto 150px;
+
+  background-repeat:
+    no-repeat,
+    no-repeat;
+
+  height: 150px;
+  background-color: #000000;  
+  border-color: transparent;
+  z-index: 1;
+}
+
+.navbar-brand {
+  position: absolute;
+  left: 50%;
+  top: 15px;
+  transform: translateX(-50%);
+  font-size: 30px;
+  font-weight: 600;
+  color: white !important;
+}
+
+.navbar-nav {
+  position: absolute;
+  bottom: 0px;
+  left: 48%;
+  transform: translateX(-50%);
+}
+
+.navbar-nav > li > a {
+  color: #FFFFFF !important;
+  background-color: transparent !important;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.navbar-nav > li > a:hover {
+  color: #e8b701 !important;
+  background-color: transparent !important;
+}
+
+.navbar-nav > li.active > a {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  color: #FFFFFF !important;
+}
+
+.navbar-nav > li.active > a:hover {
+  color: #e8b701 !important;
+}
+
+.reactable {
+  background: transparent !important;
+  border-color: transparent;
+  padding: 10px;
+}
+
+
+#leaderboard
+  .chart-shim {
+    overflow: visible;
+    }
+
+#leaderboard .chart-stage {
+  position: relative;
+  overflow-y: auto !important;
+}
+
+#leaderboard .leaderboard-rt {
+  position: static !important;
+}
+
+#leaderboard .rt-search {
+  position: absolute !important;
+  top: 25px;
+  right: 10px;
+  z-index: 9999 !important;
+  margin: 0 !important;
+}
+
+#leaderboard .leaderboard-rt .rt-table {
+  flex: 0 0 auto !important;  
+}
+
+#leaderboard a {
+  color: #4B5D6D; 
+}
+
+#leaderboard a:hover {
+  color: #e8b701;
+}
+
+.my-row:hover {
+  background-color: #CF989033 !important;
+}
+
+.sidebar,
+.sidebar-content {
+  background-color: #3c0037 !important;
+  border-color: transparent;
+  background-image: url('../styling/groundhog_time.jpg');
+  background-repeat: no-repeat;
+  background-position: right bottom;
+  background-size: 200px auto;
+  padding-bottom: 140px; 
+  color: #FFFFFF;
+}
+
+.section {
+  border: none !important;
+}
