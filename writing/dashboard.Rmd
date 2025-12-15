@@ -336,3 +336,16 @@ Data sources (weather, groundhogs, packages?)
 Spring onset calcs
 
 Phylo info
+
+**Citations for used packages:**
+```{r}
+citation("flexdashboard")
+citation("tidyverse")
+citation("nasapower")
+citation("reactable")
+citation("reactablefmtr")
+citation("htmltools")
+citation("htmlwidgets")
+citation("scales")
+citation("knitr")
+```
