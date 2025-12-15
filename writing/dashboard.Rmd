@@ -229,7 +229,7 @@ quartile_plot <- ggplot() +
            position = position_nudge(x = 0.0), width = 0.35) +
   facet_wrap(~ quartile, scales = "free_x") +
   labs(
-    title = "Consistency quartiles",
+    title = "Early Spring Consistency (Q1 = least consistent 25%)",
     x = " ",
     y = "Proportion\n\n",
     fill = "Metric"
@@ -238,7 +238,7 @@ quartile_plot <- ggplot() +
   theme_minimal() +
   guides(color = guide_legend(override.aes = list(size = 10))) +
   theme(
-    axis.text.x = element_text(size = 6, angle = 45, hjust = 1),
+    axis.text.x = element_text(size = 6, face = "bold", angle = 45, hjust = 1),
     axis.text.y = element_text(size = 8),
     axis.title.y = element_text(size = 10),
     legend.position = c(0.5, -.25), legend.direction = "horizontal",
@@ -272,22 +272,25 @@ quartile_plot <- ggplot() +
 #Create the plot and for consistency vs accuracy
 consist_plot <- foo %>% ggplot(aes(x = consistency, y = accuracy, colour = quartile)) +
   geom_point() +
-  geom_smooth(method = "lm", se = FALSE, colour = "black", linewidth = .3) +
+  geom_smooth(method = "lm", se = TRUE, colour = "black", linewidth = .3) +
   theme(legend.position = "none") +
   annotate("text", x = .13, y = .35, label = "italic(R)^2 == .035",
            parse = TRUE, size = 3, angle = 7.7) +
   labs(x = "Early Spring Consistency\n at Prognoticator Location",
        y = "Pronosticator Accuracy") +
-  theme(axis.title.x = element_text(size =10, vjust = 3),
-        axis.title.y = element_text(size = 10))
-  
-  
+  theme(axis.title.x = element_text(size =10, vjust = 14),
+        axis.title.y = element_text(size = 10),
+        legend.position = c(0.5, -.25), legend.direction = "horizontal",
+        legend.text = element_text(size = 8)) +
+  theme(legend.title=element_blank())
+
 
 library(patchwork)
 
 #reduce margin of consist_plot
 
 combined_plot <- consist_plot + quartile_plot
+ 
 
 
   
