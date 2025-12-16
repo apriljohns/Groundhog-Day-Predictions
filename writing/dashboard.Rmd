@@ -45,37 +45,7 @@ library(leaflet)
 groundhog_phylo <- read_csv("../data/groundhog_phylo.csv")
 groundhog_range <- st_read("../data/shape_files/groundhog_range.shp")
 
-groundhog_map <- groundhogs %>% 
-  left_join(groundhog_phylo) %>% 
-  mutate(is_groundhog = sci_name == "Marmota monax",
-         alive_gh = paste0(is_groundhog, ", ", alive),
-         alive_gh = trimws(alive_gh)) %>% 
-  rename("lon" = longitude,
-         "lat" = latitude)
-
----
-title: "GH Map"
-author: "Molly Murphy"
-date: "2025-12-03"
-output: html_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r}
-library(tidyverse)
-library(sf)
-library(leaflet)
-```
-
-```{r}
-groundhogs <- read_csv("../data/groundhogs_2025.csv")
-groundhog_phylo <- read_csv("../data/groundhog_phylo.csv")
-groundhog_range <- st_read("../data/shape_files/groundhog_range.shp")
-
-groundhog_map <- groundhogs %>% 
+groundhog_map <- groundhogs_raw %>% 
   left_join(groundhog_phylo) %>% 
   mutate(is_groundhog = sci_name == "Marmota monax",
          alive_gh = paste0(is_groundhog, ", ", alive),
