@@ -9,22 +9,75 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r}
+library(tidyverse)
+library(sf)
+library(leaflet)
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+groundhogs <- read_csv("../data/groundhogs_2025.csv")
+groundhog_phylo <- read_csv("../data/groundhog_phylo.csv")
+groundhog_range <- st_read("../data/shape_files/groundhog_range.shp")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+groundhog_map <- groundhogs %>% 
+  left_join(groundhog_phylo) %>% 
+  mutate(is_groundhog = sci_name == "Marmota monax",
+         alive_gh = paste0(is_groundhog, ", ", alive),
+         alive_gh = trimws(alive_gh)) %>% 
+  rename("lon" = longitude,
+         "lat" = latitude)
+  
+
+```
+
+```{r}
+gh_icons <- awesomeIconList(
+  "TRUE, yes"    = makeAwesomeIcon(
+    icon = "paw",    
+    markerColor = "darkpurple",
+    library = "fa"),
+  "FALSE, yes"   = makeAwesomeIcon(                                     
+    icon = "paw",
+    markerColor = "darkgreen",
+    library = "fa"),
+  "TRUE, no"     = makeAwesomeIcon(
+    icon = "times",    
+    markerColor = "darkpurple",
+    library = "fa"),
+  "FALSE, no"    = makeAwesomeIcon(
+    icon = "times",    
+    markerColor = "darkgreen",
+    library = "fa"),
+  "TRUE, never"  = makeAwesomeIcon(
+    icon = "cube", 
+    markerColor = "darkpurple", 
+    library = "fa"),
+  "FALSE, never" = makeAwesomeIcon(
+    icon = "cube", 
+    markerColor = "darkgreen",
+    library = "fa")
+)
+
+
+leaflet(groundhog_map) %>% 
+  addTiles() %>% 
+  addPolygons(
+    data = groundhog_range,
+    fillColor = '#EFD6C1',
+    fillOpacity = 0.3,
+    color = '#8A1A6B',
+    weight = 1
+  ) %>%
+  addAwesomeMarkers(
+    lng   = ~lon,
+    lat   = ~lat,
+    icon  = ~gh_icons[alive_gh],
+    label = ~name
+  )
+
+  
+```
+
