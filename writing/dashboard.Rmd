@@ -30,7 +30,10 @@ avg_daily_temp_df <- read_csv('../data/average_daily_temp_2025.csv')
 Sidebar {.sidebar}
 ======================================================================
 
-I was thinking it would be cute to have a little explanation/history of groundhog day as well as some navigation info
+Since 1887, a groundhog named Punxsutawney Phil has emerged from his burrow on February 2nd to look for his shadow. If he sees it, he retreats to his burrow, indicating another six weeks of winter. Since then, many other Groundhog Day prognosticators have emerged, all claiming to predict the weather.
+
+The records of 88 prognosticators were aggregated from <https://groundhog-day.com/>. While many prognosticators are groundhogs (*Marmota monax*), 17 other species are also represented. Previous studies have evaluated the overall accuracy of Groundhog Day prognosticators, but no one has compared groundhogs to non-groundhogs.  Explore the dashboard to see the distribution of prognosticators, the overall performance of individuals, and the accuracy of prognosticators when adjusted to their climate stability. 
+
 
 Map
 ======================================================================
