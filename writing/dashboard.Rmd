@@ -38,9 +38,98 @@ Map
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### Map of US and Canada
+```{r}
+library(sf)
+library(leaflet)
 
-### New England
+groundhog_phylo <- read_csv("../data/groundhog_phylo.csv")
+groundhog_range <- st_read("../data/shape_files/groundhog_range.shp")
+
+groundhog_map <- groundhogs %>% 
+  left_join(groundhog_phylo) %>% 
+  mutate(is_groundhog = sci_name == "Marmota monax",
+         alive_gh = paste0(is_groundhog, ", ", alive),
+         alive_gh = trimws(alive_gh)) %>% 
+  rename("lon" = longitude,
+         "lat" = latitude)
+
+---
+title: "GH Map"
+author: "Molly Murphy"
+date: "2025-12-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(sf)
+library(leaflet)
+```
+
+```{r}
+groundhogs <- read_csv("../data/groundhogs_2025.csv")
+groundhog_phylo <- read_csv("../data/groundhog_phylo.csv")
+groundhog_range <- st_read("../data/shape_files/groundhog_range.shp")
+
+groundhog_map <- groundhogs %>% 
+  left_join(groundhog_phylo) %>% 
+  mutate(is_groundhog = sci_name == "Marmota monax",
+         alive_gh = paste0(is_groundhog, ", ", alive),
+         alive_gh = trimws(alive_gh)) %>% 
+  rename("lon" = longitude,
+         "lat" = latitude)
+
+gh_icons <- awesomeIconList(
+  "TRUE, yes"    = makeAwesomeIcon(
+    icon = "paw",    
+    markerColor = "darkpurple",
+    library = "fa"),
+  "FALSE, yes"   = makeAwesomeIcon(                                     
+    icon = "paw",
+    markerColor = "darkgreen",
+    library = "fa"),
+  "TRUE, no"     = makeAwesomeIcon(
+    icon = "times",    
+    markerColor = "darkpurple",
+    library = "fa"),
+  "FALSE, no"    = makeAwesomeIcon(
+    icon = "times",    
+    markerColor = "darkgreen",
+    library = "fa"),
+  "TRUE, never"  = makeAwesomeIcon(
+    icon = "cube", 
+    markerColor = "darkpurple", 
+    library = "fa"),
+  "FALSE, never" = makeAwesomeIcon(
+    icon = "cube", 
+    markerColor = "darkgreen",
+    library = "fa")
+)
+
+
+leaflet(groundhog_map) %>% 
+  addTiles() %>% 
+  addPolygons(
+    data = groundhog_range,
+    fillColor = '#EFD6C1',
+    fillOpacity = 0.3,
+    color = '#8A1A6B',
+    weight = 1
+  ) %>%
+  addAwesomeMarkers(
+    lng   = ~lon,
+    lat   = ~lat,
+    icon  = ~gh_icons[alive_gh],
+    label = ~name
+  )
+
+
+```
+
 
 Leaderboard
 ============================================================================
