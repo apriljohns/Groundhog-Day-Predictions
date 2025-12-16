@@ -328,24 +328,105 @@ print(combined_plot)
 
 Documentation
 ============================================================================
+Row
+-------------------------------------
+### 
 
-Things to document:
+---
 
-Data sources (weather, groundhogs, packages?)
+<h4 style = "font-size:20px; text-align:center;"><b> Workflow and Analysis </b></h4>
 
-Spring onset calcs
+---
 
-Phylo info
+***Mapping Groundhog Day Prognosticators***
 
-**Citations for used packages:**
+
+***Mapping Groundhog Habitat Range***
+
+
+***Retrieving Historical Weather Data***
+
+Using latitude and longitude values provided in the original groundhog dataset, we queried NASA POWER data for each groundhog location. For each location, we collected average daily surface temperature (T2M) between 01/01/1981 and 07/01/2025. The resulting dataset was then written to a CSV file and saved in the project’s *data* directory. This allowed the analysis to remain reproducible while avoiding the need to re-query the *nasapower* database each time the script was run. 
+
+***Assessing Prediction Accuracy***
+
+Each groundhog prediction falls into one of two categories: 
+
+1. Sees shadow, predicting *six more weeks of winter*
+2. Does not see shadow, predicting an *early spring*
+
+To evaluate prediction accuracy, we divided the seasonal temperature data into three six-week windows:
+
+1. Winter baseline: the six weeks preceding Groundhog Day
+2. Prediction window: the six weeks following Groundhog Day
+3. Spring baseline: the six-week period after the prediction window
+
+For each window, we calculated the mean daily temperature. We then determined whether the observed temperature during the prediction window was more similar to winter or spring conditions by comparing its distance from the winter and spring averages. A prediction was classified as correct if the groundhog’s prediction matched the observed weather conditions.
+
+***Comparing Prognosticator Accuracy***
+
+To compare performance across prognosticators, we calculated overall accuracy as the proportion of correct predictions out of total predictions made by each groundhog. Prognosticators were then ranked by this accuracy metric. These results were displayed in an interactive leaderboard, allowing users to explore accuracy rankings alongside summarizing information about each prognosticator, including details such as location, number of years prognosticating, and links to their profiles. 
+
+***Assessing Seasonal Consistency***
+
+
+***Correcting Prognosticator Accuracy***
+
+---
+
+<h4 style = "font-size:20px; text-align:center;"><b> Data Sources </b></h4>
+
+---
+
+***Original Data:***
+[Tidy Tuesday](https://github.com/rfordatascience/tidytuesday/blob/main/data/2024/2024-01-30/readme.md)
+
+***Prognosticators and Predictions:***
+[Groundhog Day Website](https://groundhog-day.com/)
+
+***Weather Data API:***
+[NASA POWER](https://power.larc.nasa.gov/parameters/)
+
+***Groundhog Habitat Range:***
+[Groundhog Habitat Range]()
+
+Row 
+-------------------------------------
+### 
+
+---
+
+<h4 style = "font-size:20px; text-align:center;"><b> Packages Highlight </b></h4>
+
+---
+
+***nasapower***
+
+The [nasapower](https://docs.ropensci.org/nasapower/) package provides an interface for easily accessing NASA POWER (Prediction Of Worldwide Energy Resource) global climatology and meteorology data directly within R and in a tidy format. We used this package to retrieve daily average surface air temperature at 2 meters above the surface (T2M) for each prognosticator location. This particular data set has a spatial resolution of 0.5 × 0.625 degrees latitude × longitude, an hourly temporal resolution, and historical coverage dating back to January 1st, 1981. This package allowed us to link historical temperature data for each prognosticator's geographic location, which facilitated our assessment of each Groundhog Day prediction. 
+
+***reactable*** and ***reactablefmtr***
+
+The [reactable](https://glin.github.io/reactable/index.html) package was used to render interactive tables within the R Markdown flexdashboard. It provides a suite of built-in table features, such as searching and filtering rows, nesting data with expandable rows, and customizing the display. The [reactablefmtr](https://kcuilla.github.io/reactablefmtr/index.html) package further extends this functionality to enable additional styling and table features, including embedded images and displaying subplots in rows. These packages were used extensively to create the Groundhog Leaderboard, allowing users to interactively explore and compare Groundhog Day prognosticators. 
+
+***htmltools***
+
+The [htmltools](https://cran.r-project.org/web/packages/htmltools/refman/htmltools.html#htmltools-package) package was used to further customize the Groundhog Leaderboard beyond what was natively supported by existing R packages. By embedding custom HTML elements within table itself, we were able to control layout and behavior at a finer level. For example, htmltools was used to generate hyperlinked prognosticator names, allowing users to click directly from the leaderboard to external profile pages.
+
+---
+
+<h4 style = "font-size:20px; text-align:center;"><b> References </b></h4>
+
+---
+
+**Citations for Used Packages:**
 ```{r}
-citation("flexdashboard")
-citation("tidyverse")
-citation("nasapower")
-citation("reactable")
-citation("reactablefmtr")
-citation("htmltools")
-citation("htmlwidgets")
-citation("scales")
-citation("knitr")
+format(citation("flexdashboard"), style = "text")
+format(citation("tidyverse"), style = "text")
+format(citation("nasapower"), style = "text")
+format(citation("reactable"), style = "text")
+format(citation("reactablefmtr"), style = "text")
+format(citation("htmltools"), style = "text")
+format(citation("htmlwidgets"), style = "text")
+format(citation("scales"), style = "text")
+format(citation("knitr"), style = "text")
 ```
