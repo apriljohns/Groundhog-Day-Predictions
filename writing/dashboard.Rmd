@@ -155,7 +155,8 @@ leaderboard_df <- prediction_eval_df %>%
             start_year = min(year)) %>% 
   arrange(desc(accuracy)) %>% 
   mutate(rank = row_number()) %>% 
-  left_join(groundhogs_raw, by = 'id') 
+  left_join(groundhogs_raw, by = 'id') %>% 
+  mutate(groundhog_day_profile = paste0('https://groundhog-day.com/groundhogs/', slug))
   
 # use reactable to make interactive leaderboard 
 leaderboard_df %>% 
@@ -166,7 +167,7 @@ leaderboard_df %>%
                                                       fontSize = "15px")),
             columns = list(name = colDef(name = 'Name',
                                          cell = function(value, index) {
-                                           url <- leaderboard_df$source[index]
+                                           url <- leaderboard_df$groundhog_day_profile[index]
                                            tags$a(href = url, value)
                                          }),
                            accuracy = colDef(name = "Accuracy",
@@ -469,6 +470,7 @@ For each window, we calculated the mean daily temperature. We then determined wh
 To compare performance across prognosticators, we calculated overall accuracy as the proportion of correct predictions out of total predictions made by each groundhog. Prognosticators were then ranked by this accuracy metric. These results were displayed in an interactive leaderboard, allowing users to explore accuracy rankings alongside summarizing information about each prognosticator, including details such as location, number of years prognosticating, and links to their profiles. 
 
 ***Assessing Seasonal Consistency***
+
 An easy gig for a professional prognosticator would be to prognosticate in a locale with
 very consistent climate. I'm lookin' at you, "Dunkirk Dave!" To quantify weather consistency,
 we looked at the proportion of times during each prognosticator's career that there were
@@ -478,6 +480,7 @@ early spring). We took the difference of this value from one (1 minus inconsiste
 to state the Climate Consistency Index.
 
 ***Correcting Prognosticator Accuracy***
+
 To assess the accuracy of prognosticators in the context of any advantage that climate
 consistency confers, we calcualated a corrected accuracy value with the formula:
 
