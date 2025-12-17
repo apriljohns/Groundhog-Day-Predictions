@@ -8,7 +8,7 @@ css: ../styling/styles.css
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, prompt = FALSE, comment = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
 ```{r}
@@ -48,7 +48,7 @@ library(sf)
 library(leaflet)
 
 groundhog_phylo <- read_csv("../data/groundhog_phylo.csv")
-groundhog_range <- st_read("../data/shape_files/groundhog_range.shp")
+groundhog_range <- st_read("../data/shape_files/groundhog_range.shp", quiet = TRUE) 
 
 groundhog_map <- groundhogs_raw %>%
   left_join(groundhog_phylo) %>%
@@ -86,7 +86,7 @@ gh_icons <- awesomeIconList(
 )
 
 
-groundhog_map_leaflet <- leaflet(groundhog_map) %>%
+leaflet(groundhog_map) %>%
   addTiles() %>%
   addPolygons(
     data = groundhog_range,
@@ -215,7 +215,7 @@ leaderboard_df %>%
             searchable = TRUE,
             class = "leaderboard-rt",
             rowClass = "my-row") %>% 
-  add_title("Groundhog Leaderboard", font_size = 30) %>% 
+  add_title("Groundhog Day Leaderboard", font_size = 30) %>% 
   add_subtitle("Prognosticator Ranks by Overall Weather Prediction Accuracy", font_size = 20, font_color = 'darkgrey')
 ```
 
