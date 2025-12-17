@@ -46,6 +46,8 @@ Column {data-width=600}
 ```{r}
 library(sf)
 library(leaflet)
+library(leaflegend)
+library(leaflet.extras)
 
 groundhog_phylo <- read_csv("../data/groundhog_phylo.csv")
 groundhog_range <- st_read("../data/shape_files/groundhog_range.shp", quiet = TRUE) 
@@ -85,6 +87,39 @@ gh_icons <- awesomeIconList(
     library = "fa")
 )
 
+status_icons <- awesomeIconList(
+  Alive = makeAwesomeIcon(
+    icon = "heart",
+    markerColor = "cadetblue",
+    library = "fa"
+  ),
+  Dead = makeAwesomeIcon(
+    icon = "times",
+    markerColor = "cadetblue",
+    library = "fa"
+  ),
+  Inanimate = makeAwesomeIcon(
+    icon = "cube",
+    markerColor = "cadetblue",
+    library = "fa"
+  )
+)
+
+type_icons <- awesomeIconList(
+  Groundhog = makeAwesomeIcon(
+    icon = "circle",
+    markerColor = "darkpurple",
+    iconColor = "transparent",
+    library = "fa"
+  ),
+  `Not a groundhog` = makeAwesomeIcon(
+    icon = "circle",
+    markerColor = "darkgreen",
+    iconColor = "transparent",
+    library = "fa"
+  )
+)
+
 
 leaflet(groundhog_map) %>%
   addTiles() %>%
@@ -100,6 +135,15 @@ leaflet(groundhog_map) %>%
     lat   = ~lat,
     icon  = ~gh_icons[alive_gh],
     label = ~name
+  )  %>%
+  addLegendAwesomeIcon(
+    iconSet = status_icons,
+    title = "Status"
+  ) %>%
+  addLegendAwesomeIcon(
+    iconSet = type_icons,
+    title = "Type",
+    position = "bottomleft"
   )
 
 
