@@ -479,9 +479,10 @@ to state the Climate Consistency Index.
 
 ***Correcting Prognosticator Accuracy***
 To assess the accuracy of prognosticators in the context of the advantage that climate
-consistency confers, we calculated a corrected accuracy value with the formula:
+consistency confers, we calculated a corrected accuracy by multiplying the climate 
+consistency index by accuracy.
 $$
-A_{corrected} = Accuracy * [1 - |0.5 - (\sum\limits_{i=1}^{n} i \div \sum\limits_{j=1}^n n) |]
+A_{corrected} = Accuracy * [1 - |0.5 - (\sum\limits_{i=1}^{n} i \div \sum\limits_{j=1}^n j) |]
 $$
 
 $$
