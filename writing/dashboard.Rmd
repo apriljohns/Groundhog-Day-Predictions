@@ -361,7 +361,7 @@ quartile_plot <- ggplot() +
 
 #Create the plot and for consistency vs accuracy
 consist_plot <- foo %>% ggplot(aes(x = consistency, y = accuracy, colour = quartile)) +
-  geom_point(aes(text = paste0("Name: ", name, '\n', "Consistencey: ", round(consistency, 2), '\n', "Accuracy: ", round(accuracy*100, 1), "%"))) +
+  geom_point(aes(text = paste0("Name: ", name, '\n', "Consistency: ", round(consistency, 2), '\n', "Accuracy: ", round(accuracy*100, 1), "%"))) +
   geom_smooth(method = "lm", se = TRUE, colour = "black", linewidth = .3) +
   annotate("text", x = .13, y = .35, label = "<i>R</i><sup>2</sup> = 0.035",
            parse = TRUE, size = 3, angle = 7.7) +
@@ -470,7 +470,7 @@ To compare performance across prognosticators, we calculated overall accuracy as
 
 ***Assessing Seasonal Consistency***
 An easy gig for a professional prognosticator would be to prognosticate in a locale with
-very consistent climate. I'm lookin' at you, "Dunkirk Dave!" To quantify weather consistency,
+very consistent climate. We're lookin' at you, "Dunkirk Dave!" To quantify weather consistency,
 we looked at the proportion of times during each prognosticator's career that there were
 six more weeks of winter according to our model. Therefore, a maximally inconsistent climate
 pattern would be 0.5 (half the time there are six more weeks, and half the time there was
@@ -478,12 +478,17 @@ early spring). We took the difference of this value from one (1 minus inconsiste
 to state the Climate Consistency Index.
 
 ***Correcting Prognosticator Accuracy***
-To assess the accuracy of prognosticators in the context of any advantage that climate
-consistency confers, we calcualated a corrected accuracy value with the formula:
+To assess the accuracy of prognosticators in the context of the advantage that climate
+consistency confers, we calculated a corrected accuracy value with the formula:
+$$
+A_{corrected} = Accuracy * [1 - |0.5 - (\sum\limits_{i=1}^{n} i \div \sum\limits_{j=1}^n n) |]
+$$
 
-
-
----
+$$
+\begin{equation}
+\text{Where } i = \text{ a year saw shadow and } \\ j = \text{ a year a prediction was rendered}
+\end{equation}
+$$
 
 <h4 style = "font-size:20px; text-align:center;"><b> Data Sources </b></h4>
 
