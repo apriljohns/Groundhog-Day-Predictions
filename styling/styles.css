@@ -73,6 +73,20 @@ background-image:
 }
 
 
+#consistency
+  .chart-shim {
+    overflow: visible;
+    }
+    
+#consistency .chart-stage {
+  position: relative;
+  overflow-y: auto !important;
+}
+
+#consistency h3{
+  color: #808080;
+}
+
 #leaderboard
   .chart-shim {
     overflow: visible;
@@ -123,6 +137,18 @@ background-image:
   color: #FFFFFF;
 }
 
+.sidebar a {
+  color: #e8b701 !important;
+}
+
 .section {
   border: none !important;
+}
+
+#documentation h4 {
+  color: #000000; 
+}
+
+#documentation a {
+  color: #3c0037; 
 }
