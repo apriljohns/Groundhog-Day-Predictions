@@ -27,7 +27,7 @@ predictions_raw <- read_csv('../data/predictions_2025.csv')
 avg_daily_temp_df <- read_csv('../data/average_daily_temp_2025.csv')
 ```
 
-Sidebar {.sidebar}
+Sidebar {.sidebar data-width=300}
 ======================================================================
 
 Since 1887, a groundhog named Punxsutawney Phil has emerged from his burrow on February 2nd to look for his shadow. If he sees it, he retreats to his burrow, indicating another six weeks of winter. Since then, many other Groundhog Day prognosticators have emerged, all claiming to predict the weather.
