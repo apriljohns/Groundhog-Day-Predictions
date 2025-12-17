@@ -541,6 +541,8 @@ $$
 \end{equation}
 $$
 
+---
+
 <h4 style = "font-size:20px; text-align:center;"><b> Data Sources </b></h4>
 
 ---
@@ -567,6 +569,10 @@ Row
 
 ---
 
+***leaflet***
+
+The [leaflet](https://cran.r-project.org/package=leaflet) package was used to create an interactive map of Groundhog Day prognosticators. The function addAwesomeIcons was used to create icons for each prognosticator where the shape referenced the status of the prognosticator (alive, dead, or never alive/inanimate) and the color referenced the type of prognosticator (groundhog or non-groundhog). The icons are from the [Font Awesome 4.7 library](https://fontawesome.com/v4/icons/), which are included in leaflet and accessable via addAwesomeIcons.
+
 ***nasapower***
 
 The [nasapower](https://docs.ropensci.org/nasapower/) package provides an interface for easily accessing NASA POWER (Prediction Of Worldwide Energy Resource) global climatology and meteorology data directly within R and in a tidy format. We used this package to retrieve daily average surface air temperature at 2 meters above the surface (T2M) for each prognosticator location. This particular data set has a spatial resolution of 0.5 × 0.625 degrees latitude × longitude, an hourly temporal resolution, and historical coverage dating back to January 1st, 1981. This package allowed us to link historical temperature data for each prognosticator's geographic location, which facilitated our assessment of each Groundhog Day prediction. 
@@ -579,9 +585,6 @@ The [reactable](https://glin.github.io/reactable/index.html) package was used to
 
 The [htmltools](https://cran.r-project.org/web/packages/htmltools/refman/htmltools.html#htmltools-package) package was used to further customize the Groundhog leaderboard beyond what was natively supported by existing R packages. By embedding custom HTML elements within table itself, we were able to control layout and behavior at a finer level. For example, htmltools was used to generate hyperlinked prognosticator names, allowing users to click directly from the leaderboard to external profile pages.
 
-***leaflet***
-
-The [leaflet](https://cran.r-project.org/package=leaflet) package was used to create an interactive map of Groundhog Day prognosticators. The function addAwesomeIcons was used to create icons for each prognosticator where the shape referenced the status of the prognosticator (alive, dead, or never alive/inanimate) and the color referenced the type of prognosticator (groundhog or non-groundhog). The icons are from the [Font Awesome 4.7 library](https://fontawesome.com/v4/icons/), which are included in leaflet and accessable via addAwesomeIcons.
 
 ---
 
