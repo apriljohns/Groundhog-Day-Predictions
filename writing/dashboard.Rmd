@@ -526,18 +526,14 @@ early spring). We took the difference of this value from one (1 minus inconsiste
 to state the Climate Consistency Index.
 
 ***Correcting Prognosticator Accuracy***
-<<<<<<< HEAD
+
 To assess the accuracy of prognosticators in the context of the advantage that climate
 consistency confers, we calculated a corrected accuracy by multiplying the climate 
 consistency index by accuracy.
 $$
 A_{corrected} = Accuracy * [1 - |0.5 - (\sum\limits_{i=1}^{n} i \div \sum\limits_{j=1}^n j) |]
 $$
-=======
 
-To assess the accuracy of prognosticators in the context of any advantage that climate
-consistency confers, we calcualated a corrected accuracy value with the formula:
->>>>>>> 8af43679a2573a148681b1c250a725be83477429
 
 $$
 \begin{equation}
