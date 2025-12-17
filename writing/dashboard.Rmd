@@ -46,19 +46,21 @@ Column {data-width=600}
 ```{r}
 library(sf)
 library(leaflet)
+library(leaflegend)
+library(leaflet.extras)
 
-groundhog_phylo <- read_csv("../data/groundhog_phylo.csv")
-groundhog_range <- st_read("../data/shape_files/groundhog_range.shp", quiet = TRUE) 
+groundhog_phylo <- read_csv("../data/groundhog_phylo.csv") #csv with status (alive, dead, never alive) and sci name
+groundhog_range <- st_read("../data/shape_files/groundhog_range.shp", quiet = TRUE) #shapefile of groundhog range
 
-groundhog_map <- groundhogs_raw %>%
-  left_join(groundhog_phylo) %>%
-  mutate(is_groundhog = sci_name == "Marmota monax",
-         alive_gh = paste0(is_groundhog, ", ", alive),
+groundhog_map <- groundhogs_raw %>% #building the data frame for the leaflet
+  left_join(groundhog_phylo) %>% #adding the status and sci name
+  mutate(is_groundhog = sci_name == "Marmota monax", #changing the type to groundhog even if they are dead/inannimate
+         alive_gh = paste0(is_groundhog, ", ", alive), #creating a column combining status and type
          alive_gh = trimws(alive_gh)) %>%
-  rename("lon" = longitude,
+  rename("lon" = longitude, #renameing lon and lat to make using leaflet easier
          "lat" = latitude)
 
-gh_icons <- awesomeIconList(
+gh_icons <- awesomeIconList( #making the awesome icon list
   "TRUE, yes"    = makeAwesomeIcon(
     icon = "paw",
     markerColor = "darkpurple",
@@ -85,21 +87,63 @@ gh_icons <- awesomeIconList(
     library = "fa")
 )
 
+status_icons <- awesomeIconList( #making a list just for status so I can have two legends, one for status and one for type
+  Alive = makeAwesomeIcon(
+    icon = "heart",
+    markerColor = "cadetblue",
+    library = "fa"
+  ),
+  Dead = makeAwesomeIcon(
+    icon = "times",
+    markerColor = "cadetblue",
+    library = "fa"
+  ),
+  Inanimate = makeAwesomeIcon(
+    icon = "cube",
+    markerColor = "cadetblue",
+    library = "fa"
+  )
+)
 
-leaflet(groundhog_map) %>%
+type_icons <- awesomeIconList( #type list
+  Groundhog = makeAwesomeIcon(
+    icon = "circle",
+    markerColor = "darkpurple",
+    iconColor = "transparent",
+    library = "fa"
+  ),
+  `Not a groundhog` = makeAwesomeIcon(
+    icon = "circle",
+    markerColor = "darkgreen",
+    iconColor = "transparent",
+    library = "fa"
+  )
+)
+
+
+leaflet(groundhog_map) %>% #making the leaflet
   addTiles() %>%
-  addPolygons(
+  addPolygons( #adding the range from the shape file
     data = groundhog_range,
     fillColor = '#EFD6C1',
     fillOpacity = 0.3,
     color = '#8A1A6B',
     weight = 1
   ) %>%
-  addAwesomeMarkers(
+  addAwesomeMarkers( #adding the groundhogs
     lng   = ~lon,
     lat   = ~lat,
     icon  = ~gh_icons[alive_gh],
     label = ~name
+  )  %>%
+  addLegendAwesomeIcon( #adding the status legend
+    iconSet = status_icons,
+    title = "Status"
+  ) %>%
+  addLegendAwesomeIcon( #adding the type legend
+    iconSet = type_icons,
+    title = "Type",
+    position = "bottomleft"
   )
 
 
@@ -155,7 +199,8 @@ leaderboard_df <- prediction_eval_df %>%
             start_year = min(year)) %>% 
   arrange(desc(accuracy)) %>% 
   mutate(rank = row_number()) %>% 
-  left_join(groundhogs_raw, by = 'id') 
+  left_join(groundhogs_raw, by = 'id') %>% 
+  mutate(groundhog_day_profile = paste0('https://groundhog-day.com/groundhogs/', slug))
   
 # use reactable to make interactive leaderboard 
 leaderboard_df %>% 
@@ -166,7 +211,7 @@ leaderboard_df %>%
                                                       fontSize = "15px")),
             columns = list(name = colDef(name = 'Name',
                                          cell = function(value, index) {
-                                           url <- leaderboard_df$source[index]
+                                           url <- leaderboard_df$groundhog_day_profile[index]
                                            tags$a(href = url, value)
                                          }),
                            accuracy = colDef(name = "Accuracy",
@@ -441,9 +486,11 @@ Row
 
 ***Mapping Groundhog Day Prognosticators***
 
+The locations of the prognosticators were added to an interactive leaflet map using the longitude and latitude values provided in the original dataset. Awesome icons, a marker that is built into the base leaflet package, was used to add markers with icons indicating the status of the prognosticator and colors indicating the type. Legends were added via [leaflegend](https://cran.r-project.org/package=leaflegend).
 
 ***Mapping Groundhog Habitat Range***
 
+The groundhog habitat range shape file was obtained from the International Union for the Conservatio 
 
 ***Retrieving Historical Weather Data***
 
@@ -469,6 +516,7 @@ For each window, we calculated the mean daily temperature. We then determined wh
 To compare performance across prognosticators, we calculated overall accuracy as the proportion of correct predictions out of total predictions made by each groundhog. Prognosticators were then ranked by this accuracy metric. These results were displayed in an interactive leaderboard, allowing users to explore accuracy rankings alongside summarizing information about each prognosticator, including details such as location, number of years prognosticating, and links to their profiles. 
 
 ***Assessing Seasonal Consistency***
+
 An easy gig for a professional prognosticator would be to prognosticate in a locale with
 very consistent climate. We're lookin' at you, "Dunkirk Dave!" To quantify weather consistency,
 we looked at the proportion of times during each prognosticator's career that there were
@@ -478,12 +526,18 @@ early spring). We took the difference of this value from one (1 minus inconsiste
 to state the Climate Consistency Index.
 
 ***Correcting Prognosticator Accuracy***
+<<<<<<< HEAD
 To assess the accuracy of prognosticators in the context of the advantage that climate
 consistency confers, we calculated a corrected accuracy by multiplying the climate 
 consistency index by accuracy.
 $$
 A_{corrected} = Accuracy * [1 - |0.5 - (\sum\limits_{i=1}^{n} i \div \sum\limits_{j=1}^n j) |]
 $$
+=======
+
+To assess the accuracy of prognosticators in the context of any advantage that climate
+consistency confers, we calcualated a corrected accuracy value with the formula:
+>>>>>>> 8af43679a2573a148681b1c250a725be83477429
 
 $$
 \begin{equation}
@@ -505,7 +559,7 @@ $$
 [NASA POWER](https://power.larc.nasa.gov/parameters/)
 
 ***Groundhog Habitat Range:***
-[Groundhog Habitat Range]()
+IUCN. 2025. The IUCN Red List of Threatened Species. Version 2025-2. <https://www.iucnredlist.org>. Accessed on December 7, 2025.
 
 Row 
 -------------------------------------
@@ -527,7 +581,11 @@ The [reactable](https://glin.github.io/reactable/index.html) package was used to
 
 ***htmltools***
 
-The [htmltools](https://cran.r-project.org/web/packages/htmltools/refman/htmltools.html#htmltools-package) package was used to further customize the Groundhog Leaderboard beyond what was natively supported by existing R packages. By embedding custom HTML elements within table itself, we were able to control layout and behavior at a finer level. For example, htmltools was used to generate hyperlinked prognosticator names, allowing users to click directly from the leaderboard to external profile pages.
+The [htmltools](https://cran.r-project.org/web/packages/htmltools/refman/htmltools.html#htmltools-package) package was used to further customize the Groundhog leaderboard beyond what was natively supported by existing R packages. By embedding custom HTML elements within table itself, we were able to control layout and behavior at a finer level. For example, htmltools was used to generate hyperlinked prognosticator names, allowing users to click directly from the leaderboard to external profile pages.
+
+***leaflet***
+
+The [leaflet](https://cran.r-project.org/package=leaflet) package was used to create an interactive map of Groundhog Day prognosticators. The function addAwesomeIcons was used to create icons for each prognosticator where the shape referenced the status of the prognosticator (alive, dead, or never alive/inanimate) and the color referenced the type of prognosticator (groundhog or non-groundhog). The icons are from the [Font Awesome 4.7 library](https://fontawesome.com/v4/icons/), which are included in leaflet and accessable via addAwesomeIcons.
 
 ---
 
@@ -546,4 +604,8 @@ format(citation("htmltools"), style = "text")
 format(citation("htmlwidgets"), style = "text")
 format(citation("scales"), style = "text")
 format(citation("knitr"), style = "text")
+format(citation("sf"), style = "text")
+format(citation("leaflet"), style = "text")
+format(citation("leaflegend"), style = "text")
+format(citation("leaflet.extras"), style = "text")
 ```
