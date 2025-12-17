@@ -485,11 +485,11 @@ Row
 
 ***Mapping Groundhog Day Prognosticators***
 
-
+The locations of the prognosticators were added to an interactive leaflet map using the longitude and latitude values provided in the original dataset. Awesome icons, a marker that is built into the base leaflet package, was used to add markers with icons indicating the status of the prognosticator and colors indicating the type. Legends were added via [leaflegend](https://cran.r-project.org/package=leaflegend).
 
 ***Mapping Groundhog Habitat Range***
 
-
+The groundhog habitat range shape file was obtained from the International Union for the Conservatio 
 
 ***Retrieving Historical Weather Data***
 
