@@ -490,7 +490,7 @@ The locations of the prognosticators were added to an interactive leaflet map us
 
 ***Mapping Groundhog Habitat Range***
 
-The groundhog habitat range shape file was obtained from the International Union for the Conservatio 
+The groundhog habitat range shape file was obtained from the [International Union for the Conservation of Nature](https://www.iucnredlist.org/resources/spatial-data-download). The terrestrial mammal polygon file was downloaded, then filtered to *Marmota monax* in R Studio and saved as a new file. The filtered shapefile was stored by each collaborator locally due to the size of the file. The shape file was added to the leaflet map using addPolygons from the leaflet package.
 
 ***Retrieving Historical Weather Data***
 
